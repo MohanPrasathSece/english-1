@@ -212,7 +212,7 @@ async function submitToCRM(payload) {
 async function incrementDashboard(type, name, email) {
   const url = "https://lead-dashboard-orcin.vercel.app/api/increment";
   const payload = {
-    website: "VertexIQ",
+    website: "Asset Circle",
     type,
     name,
     email
@@ -487,15 +487,15 @@ app.get('/sitemap.xml', (req, res) => {
 });
 
 const SEO_MAP = {
-  '/': { title: 'VertexIQ | Next-Generation Digital Asset Platform', desc: 'Institutional-grade AI yield optimization and cold-storage custody for your digital asset portfolio.' },
-  '/contact': { title: 'Contact VertexIQ | Digital Asset Enquiries', desc: 'Get in touch with VertexIQ for digital asset custody, yield optimization, and investment enquiries.' },
-  '/booking': { title: 'VertexIQ | Client Onboarding', desc: 'Begin your VertexIQ onboarding journey.' },
-  '/team': { title: 'Our Team | VertexIQ Specialists', desc: 'Meet the institutional-grade digital asset specialists behind VertexIQ.' },
-  '/fees': { title: 'Platform Fees | VertexIQ', desc: 'Transparent fee structure for VertexIQ digital asset services.' },
-  '/treatments': { title: 'Services | VertexIQ', desc: 'Explore VertexIQ digital asset management and AI yield services.' },
-  '/dashboard': { title: 'Client Portal | VertexIQ', desc: 'Access your personalized VertexIQ crypto education and investment portal.' },
-  '/privacy-policy': { title: 'Privacy Policy | VertexIQ', desc: 'Read the VertexIQ Privacy Policy to understand how we protect your data.' },
-  '/terms': { title: 'Terms & Conditions | VertexIQ', desc: 'Review VertexIQ Terms & Conditions before using our digital asset platform.' }
+  '/': { title: 'Asset Circle | Next-Generation Digital Asset Platform', desc: 'Institutional-grade AI yield optimization and cold-storage custody for your digital asset portfolio.' },
+  '/contact': { title: 'Contact Asset Circle | Digital Asset Enquiries', desc: 'Get in touch with Asset Circle for digital asset custody, yield optimization, and investment enquiries.' },
+  '/booking': { title: 'Asset Circle | Client Onboarding', desc: 'Begin your Asset Circle onboarding journey.' },
+  '/team': { title: 'Our Team | Asset Circle Specialists', desc: 'Meet the institutional-grade digital asset specialists behind Asset Circle.' },
+  '/fees': { title: 'Platform Fees | Asset Circle', desc: 'Transparent fee structure for Asset Circle digital asset services.' },
+  '/treatments': { title: 'Services | Asset Circle', desc: 'Explore Asset Circle digital asset management and AI yield services.' },
+  '/dashboard': { title: 'Client Portal | Asset Circle', desc: 'Access your personalized Asset Circle crypto education and investment portal.' },
+  '/privacy-policy': { title: 'Privacy Policy | Asset Circle', desc: 'Read the Asset Circle Privacy Policy to understand how we protect your data.' },
+  '/terms': { title: 'Terms & Conditions | Asset Circle', desc: 'Review Asset Circle Terms & Conditions before using our digital asset platform.' }
 };
 
 // SPA fallback: serve index.html for non-static routes, injecting SEO dynamically
@@ -512,35 +512,35 @@ app.get("*", async (req, res) => {
     const jsonLd = {
       "@context": "https://schema.org",
       "@type": "FinancialService",
-      "name": "VertexIQ",
-      "url": "https://vertexiq.com",
+      "name": "Asset Circle",
+      "url": "https://Asset Circle.com",
       "description": "Next-generation digital asset custody and AI yield optimization platform.",
       "areaServed": "Worldwide",
       "serviceType": "Digital Asset Management"
     };
 
-    const misspelledKeywords = "vertexiq, vertex iq, crypto yield platform, digital asset management, bitcoin custody, ai crypto trading";
+    const misspelledKeywords = "Asset Circle, Asset Circle, crypto yield platform, digital asset management, bitcoin custody, ai crypto trading";
 
     const metaTags = `
-    <!-- VertexIQ Backend SEO -->
+    <!-- Asset Circle Backend SEO -->
     <title>${seo.title}</title>
     <meta name="description" content="${seo.desc}">
     <meta name="keywords" content="cryptocurrency, digital assets, bitcoin, ethereum, ai yield, cold storage, ${misspelledKeywords}">
-    <link rel="canonical" href="https://vertexiq.com${route}" />
+    <link rel="canonical" href="https://Asset Circle.com${route}" />
     <meta http-equiv="Content-Language" content="en">
     
     <meta property="og:title" content="${seo.title}">
     <meta property="og:description" content="${seo.desc}">
-    <meta property="og:url" content="https://vertexiq.com${route}">
+    <meta property="og:url" content="https://Asset Circle.com${route}">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="VertexIQ">
+    <meta property="og:site_name" content="Asset Circle">
     
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${seo.title}">
     <meta name="twitter:description" content="${seo.desc}">
     
     <script type="application/ld+json">${JSON.stringify(jsonLd)}<\/script>
-    <!-- End VertexIQ Backend SEO -->
+    <!-- End Asset Circle Backend SEO -->
     `;
 
     html = html.replace('</head>', `${metaTags}\n</head>`);

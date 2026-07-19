@@ -39,12 +39,12 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
   }, [mobileOpen]);
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800 text-white">
+    <nav className="sticky top-0 z-50 backdrop-blur-md bg-background/80 border-b border-border">
       <div className="container mx-auto flex items-center justify-between py-4 px-6">
         <Link to="/" className="flex items-center gap-2">
-          <Shield className="text-primary w-8 h-8 animate-pulse" />
-          <span className="text-xl font-bold tracking-tight font-sans">
-            Vertex<span className="text-primary">IQ</span>
+          <Shield className="text-primary w-8 h-8" />
+          <span className="text-xl font-bold tracking-tight font-sans text-foreground">
+            Asset<span className="text-primary">Circle</span>
           </span>
         </Link>
 
@@ -55,7 +55,7 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
               key={link.to}
               to={link.to}
               onClick={() => handleNavClick(link.to)}
-              className="relative px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors duration-200"
+              className="relative px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200"
             >
               {link.label}
               {location.pathname === link.to && (
@@ -88,12 +88,12 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
         <div className="hidden lg:flex items-center gap-3">
           {user ? (
             <div className="flex items-center gap-3">
-              <span className="text-xs text-slate-400 flex items-center gap-1">
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
                 <User size={14} /> {user.name}
               </span>
               <button
                 onClick={onLogout}
-                className="inline-flex items-center gap-1 px-4 py-2.5 rounded-lg bg-red-500/10 text-red-400 text-sm font-semibold hover:bg-red-500/20 transition-colors duration-200"
+                className="inline-flex items-center gap-1 px-4 py-2.5 rounded-lg bg-red-50 text-red-500 text-sm font-semibold hover:bg-red-100 border border-red-200 transition-colors duration-200"
               >
                 <LogOut size={14} /> Logout
               </button>
@@ -111,7 +111,7 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
         {/* Mobile toggle */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="lg:hidden p-2 text-slate-100"
+          className="lg:hidden p-2 text-foreground"
           aria-label="Toggle menu"
         >
           {mobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -152,7 +152,7 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 24, opacity: 0, scale: 0.98 }}
               transition={{ type: "spring", damping: 22, stiffness: 260 }}
-              className="relative mx-auto mt-20 w-[calc(100%-2.5rem)] max-w-sm rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl overflow-hidden text-white"
+              className="relative mx-auto mt-20 w-[calc(100%-2.5rem)] max-w-sm rounded-3xl bg-card border border-border shadow-xl overflow-hidden"
             >
               <div className="px-6 py-6">
                 <nav className="space-y-2">
@@ -173,7 +173,7 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
                             "flex items-center justify-between rounded-2xl px-5 py-4 text-base font-medium transition-colors " +
                             (active
                               ? "bg-primary/10 text-primary"
-                              : "text-slate-300 hover:text-white hover:bg-white/5")
+                              : "text-muted-foreground hover:text-foreground hover:bg-secondary")
                           }
                         >
                           <span>{link.label}</span>
@@ -210,11 +210,11 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="pt-4 border-t border-slate-800 flex flex-col gap-2"
+                    className="pt-4 border-t border-border flex flex-col gap-2"
                   >
                     {user ? (
                       <div className="flex flex-col gap-2">
-                        <div className="px-5 py-2 text-xs text-slate-400 flex items-center gap-1.5">
+                        <div className="px-5 py-2 text-xs text-muted-foreground flex items-center gap-1.5">
                           <User size={14} /> Logged in: {user.name}
                         </div>
                         <button
