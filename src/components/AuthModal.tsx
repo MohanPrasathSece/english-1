@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { toast } from "sonner";
 import { Loader2, Mail, User, Phone, Shield, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import CountryDropdown, { countries, Country, cleanPhoneNumber } from "./CountryDropdown";
 
 interface AuthModalProps {
@@ -15,6 +16,7 @@ interface AuthModalProps {
 export default function AuthModal({ isOpen, onClose, onSuccess, initialTab = "signup" }: AuthModalProps) {
   const [tab, setTab] = useState<"login" | "signup">(initialTab);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -49,6 +51,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialTab = "si
         toast.success("Welcome back! You're now logged in.");
         onSuccess(data.sessionToken, data.user);
         onClose();
+        navigate("/dashboard");
       } catch {
         toast.error("An unexpected error occurred. Please try again.");
       } finally {
@@ -81,6 +84,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialTab = "si
         }
         onSuccess(data.sessionToken, data.user);
         onClose();
+        navigate("/dashboard");
       } catch {
         toast.error("An unexpected error occurred. Please try again.");
       } finally {
