@@ -187,6 +187,7 @@ async function submitToCRM(payload) {
       responseJson.status === "duplicate" ||
       responseStr.includes("already exists") ||
       responseStr.includes("duplicate email") ||
+      responseStr.includes("duplicate lead") ||
       responseStr.includes("already contacted")
     );
 
