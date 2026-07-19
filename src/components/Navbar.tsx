@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPortal } from "react-dom";
-import { ChevronRight, Menu, X } from "lucide-react";
+import { ChevronRight, Menu, X, LogOut, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "/orchid_dental_logo-removebg-preview.png";
 
@@ -13,7 +13,13 @@ const links = [
   { to: "/contact", label: "Contact" },
 ];
 
-const Navbar = () => {
+interface NavbarProps {
+  user: any;
+  onLogout: () => void;
+  onOpenAuth: () => void;
+}
+
+const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -64,14 +70,53 @@ const Navbar = () => {
               )}
             </Link>
           ))}
+          {user && (
+            <Link
+              to="/dashboard"
+              onClick={() => handleNavClick("/dashboard")}
+              className="relative px-4 py-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors duration-200"
+            >
+              Crypto Experience
+              {location.pathname === "/dashboard" && (
+                <motion.div
+                  layoutId="nav-underline"
+                  className="absolute bottom-0 left-4 right-4 h-0.5 bg-primary rounded-full"
+                  transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                />
+              )}
+            </Link>
+          )}
         </div>
 
-        <Link
-          to="/contact"
-          className="hidden lg:inline-flex items-center px-6 py-3 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:brightness-110 active:scale-95 transition-all duration-200"
-        >
-          Contact Us
-        </Link>
+        <div className="hidden lg:flex items-center gap-3">
+          <Link
+            to="/contact"
+            className="inline-flex items-center px-5 py-2.5 rounded-lg bg-accent text-accent-foreground text-sm font-semibold hover:bg-accent/80 transition-colors duration-200"
+          >
+            Contact Us
+          </Link>
+
+          {user ? (
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <User size={14} /> {user.name}
+              </span>
+              <button
+                onClick={onLogout}
+                className="inline-flex items-center gap-1 px-4 py-2.5 rounded-lg bg-red-50 text-red-600 text-sm font-semibold hover:bg-red-100 transition-colors duration-200"
+              >
+                <LogOut size={14} /> Logout
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onOpenAuth}
+              className="inline-flex items-center px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:brightness-110 active:scale-95 transition-all duration-200"
+            >
+              Client Portal
+            </button>
+          )}
+        </div>
 
         {/* Mobile toggle */}
         <button
@@ -147,6 +192,63 @@ const Navbar = () => {
                       </motion.div>
                     );
                   })}
+
+                  {user && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.25 }}
+                    >
+                      <Link
+                        to="/dashboard"
+                        onClick={() => handleNavClick("/dashboard")}
+                        className={
+                          "flex items-center justify-between rounded-2xl px-5 py-4 text-base font-semibold transition-colors " +
+                          (location.pathname === "/dashboard"
+                            ? "bg-primary/10 text-primary"
+                            : "text-primary hover:bg-primary/5")
+                        }
+                      >
+                        <span>Crypto Experience</span>
+                        <ChevronRight size={18} className="text-primary" />
+                      </Link>
+                    </motion.div>
+                  )}
+
+                  {/* Portal Button / User Info */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="pt-4 border-t border-gray-100 flex flex-col gap-2"
+                  >
+                    {user ? (
+                      <div className="flex flex-col gap-2">
+                        <div className="px-5 py-2 text-xs text-muted-foreground flex items-center gap-1.5">
+                          <User size={14} /> Logged in: {user.name}
+                        </div>
+                        <button
+                          onClick={() => {
+                            onLogout();
+                            setMobileOpen(false);
+                          }}
+                          className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-2xl bg-red-50 text-red-600 font-semibold text-sm hover:bg-red-100 transition-colors"
+                        >
+                          <LogOut size={16} /> Logout
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          onOpenAuth();
+                          setMobileOpen(false);
+                        }}
+                        className="w-full px-5 py-3.5 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm hover:brightness-110 active:scale-95 transition-all text-center"
+                      >
+                        Client Portal
+                      </button>
+                    )}
+                  </motion.div>
                 </nav>
               </div>
             </motion.div>

@@ -6,6 +6,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import fs from "fs/promises";
 import compression from "compression";
+import crypto from "crypto";
+import { put, list, del } from "@vercel/blob";
 
 dotenv.config();
 
@@ -19,11 +21,11 @@ app.use(compression());
 
 // Enable CORS for all routes
 app.use(cors({
-  origin: ['http://localhost:8080', 'http://localhost:8081', 'http://localhost:8082'],
+  origin: ['http://localhost:8080', 'http://localhost:8081', 'http://localhost:8082', 'http://localhost:5173'],
   credentials: true
 }));
 
-// Set proper MIME types and aggressive caching for static assets (Achieves 100/100 Lighthouse Speed)
+// Set proper MIME types and aggressive caching for static assets
 app.use(express.static(path.join(__dirname, "dist"), {
   maxAge: '365d',
   setHeaders: (res, filePath) => {
@@ -47,13 +49,380 @@ app.get('/manifest.json', (req, res) => {
 
 app.use(express.json({ limit: "200kb" }));
 
-app.post("/api/contact", async (req, res) => {
-  const { name, phone, email, message } = req.body ?? {};
+// Server logger helper
+function logAction(action, data) {
+  console.log(`[SERVER LOG] [${new Date().toISOString()}] [${action}]`, JSON.stringify(data, null, 2));
+}
 
-  if (!name || !phone || !email || !message) {
+// Vercel Blob helpers with filesystem fallback
+async function writeBlob(pathname, dataString) {
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const result = await put(pathname, dataString, {
+        access: 'private',
+        addRandomSuffix: false,
+        token: process.env.BLOB_READ_WRITE_TOKEN
+      });
+      logAction("Blob Write (Vercel)", { pathname, url: result.url });
+      return result;
+    } catch (err) {
+      logAction("Blob Write Error (Vercel)", { pathname, error: err.message });
+    }
+  }
+  // Local fallback
+  const localPath = path.join(__dirname, '.blob_storage', pathname);
+  await fs.mkdir(path.dirname(localPath), { recursive: true });
+  await fs.writeFile(localPath, dataString, 'utf-8');
+  logAction("Blob Write (Local Fallback)", { pathname, localPath });
+  return { url: `local://${pathname}` };
+}
+
+async function readBlob(pathname) {
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const { blobs } = await list({
+        prefix: pathname,
+        token: process.env.BLOB_READ_WRITE_TOKEN
+      });
+      const found = blobs.find(b => b.pathname === pathname);
+      if (found) {
+        const res = await fetch(found.url);
+        if (res.ok) {
+          const text = await res.text();
+          logAction("Blob Read (Vercel)", { pathname, size: text.length });
+          return text;
+        }
+      }
+    } catch (err) {
+      logAction("Blob Read Error (Vercel)", { pathname, error: err.message });
+    }
+  }
+  // Local fallback
+  const localPath = path.join(__dirname, '.blob_storage', pathname);
+  try {
+    const text = await fs.readFile(localPath, 'utf-8');
+    logAction("Blob Read (Local Fallback)", { pathname, size: text.length });
+    return text;
+  } catch (err) {
+    return null;
+  }
+}
+
+async function deleteBlob(pathname) {
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const { blobs } = await list({
+        prefix: pathname,
+        token: process.env.BLOB_READ_WRITE_TOKEN
+      });
+      const found = blobs.find(b => b.pathname === pathname);
+      if (found) {
+        await del(found.url, { token: process.env.BLOB_READ_WRITE_TOKEN });
+        logAction("Blob Delete (Vercel)", { pathname });
+      }
+    } catch (err) {
+      logAction("Blob Delete Error (Vercel)", { pathname, error: err.message });
+    }
+  }
+  const localPath = path.join(__dirname, '.blob_storage', pathname);
+  try {
+    await fs.unlink(localPath);
+    logAction("Blob Delete (Local Fallback)", { pathname });
+  } catch (err) {}
+}
+
+// CRM Lead Integration helper
+async function submitToCRM(payload) {
+  const crmUrl = process.env.CRM_URL || "https://inwo.crmcore.me/api/lead_management/api/affiliates";
+  const crmToken = process.env.CRM_TOKEN || "test_token";
+
+  const headers = {
+    "Content-Type": "application/json",
+    "Token": crmToken,
+    "Authorization": `Bearer ${crmToken}`,
+    "X-Affiliate-Token": crmToken,
+    "x-token": crmToken
+  };
+
+  logAction("CRM Request Payload", { url: crmUrl, payload });
+
+  // Disable SSL check immediately before the CRM request
+  const originalRejectUnauthorized = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
+  try {
+    const res = await fetch(crmUrl, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload)
+    });
+
+    // Revert SSL check configuration
+    if (originalRejectUnauthorized !== undefined) {
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalRejectUnauthorized;
+    } else {
+      delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+    }
+
+    const status = res.status;
+    let responseText = "";
+    let responseJson = null;
+    try {
+      responseText = await res.text();
+      responseJson = JSON.parse(responseText);
+    } catch (e) {
+      responseJson = { raw: responseText };
+    }
+
+    logAction("CRM Response", { status, body: responseJson });
+
+    // Handle responses
+    // Check if status is success or if the payload says it already exists
+    // Duplicate detection:
+    // If responseJson has duplicate: true OR message/error suggests account already exists
+    const responseStr = JSON.stringify(responseJson).toLowerCase();
+    const isDuplicate = responseJson && (
+      responseJson.duplicate === true ||
+      responseJson.is_duplicate === true ||
+      responseJson.status === "duplicate" ||
+      responseStr.includes("already exists") ||
+      responseStr.includes("duplicate email") ||
+      responseStr.includes("already contacted")
+    );
+
+    const isSuccess = status >= 200 && status < 300 && !isDuplicate;
+
+    if (isDuplicate) {
+      return { success: true, alreadyExists: true, status };
+    }
+
+    if (isSuccess) {
+      return { success: true, alreadyExists: false, status };
+    }
+
+    // Lead is not valid or other failure
+    return { success: false, alreadyExists: false, status, message: responseJson?.message || responseJson?.error || "Lead is not valid" };
+  } catch (error) {
+    logAction("CRM Request Failed", { error: error.message });
+    return { success: false, alreadyExists: false, status: 500, error: error.message };
+  }
+}
+
+// Increment Lead Dashboard Helper
+async function incrementDashboard(type, name, email) {
+  const url = "https://lead-dashboard-orcin.vercel.app/api/increment";
+  const payload = {
+    website: "VertexIQ",
+    type,
+    name,
+    email
+  };
+
+  logAction("Dashboard Request Payload", { url, payload });
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const status = res.status;
+    const responseText = await res.text();
+    logAction("Dashboard Response", { status, body: responseText });
+    return { status, success: res.ok };
+  } catch (error) {
+    logAction("Dashboard Request Failed", { error: error.message });
+    return { success: false, error: error.message };
+  }
+}
+
+// Backend Auth Signup Route
+app.post("/api/auth/signup", async (req, res) => {
+  logAction("Incoming Signup Request", { body: req.body });
+  const { name, email, phone, country } = req.body ?? {};
+
+  if (!name || !email || !phone || !country) {
     return res.status(400).json({ ok: false, error: "Missing required fields" });
   }
 
+  // 1. Submit lead to CRM first
+  // Format phone number for CRM (e.g. 0041791234567)
+  const crmPhone = phone.replace("+", "00").replace(/\D/g, "");
+  const crmPayload = {
+    country_name: country.toLowerCase(),
+    description: "",
+    phone: crmPhone,
+    email,
+    first_name: name.split(" ")[0] || name,
+    last_name: name.split(" ").slice(1).join(" ") || "",
+    custom_fields: {
+      Source_ID: "Website",
+      Outline_Your_Case: ""
+    }
+  };
+
+  const crmResult = await submitToCRM(crmPayload);
+
+  if (!crmResult.success) {
+    return res.status(400).json({
+      ok: false,
+      errorType: "invalid_lead",
+      message: "We couldn't process your enquiry with the information provided. Please review your details and try again."
+    });
+  }
+
+  // If successfully accepted, increment Lead Dashboard
+  if (!crmResult.alreadyExists) {
+    await incrementDashboard("signup", name, email);
+  }
+
+  // 2. Blob Signup/Login
+  // Create / Retrieve User
+  const userFilename = `users/${email.toLowerCase()}.json`;
+  let existingUser = await readBlob(userFilename);
+  let userObj;
+
+  if (existingUser) {
+    userObj = JSON.parse(existingUser);
+  } else {
+    // Create new Blob account
+    userObj = { name, email, phone, country, createdAt: new Date().toISOString() };
+    await writeBlob(userFilename, JSON.stringify(userObj));
+  }
+
+  // Create session
+  const sessionToken = crypto.randomBytes(32).toString("hex");
+  const sessionFilename = `sessions/${sessionToken}.json`;
+  const sessionObj = { email: email.toLowerCase(), createdAt: new Date().toISOString() };
+  await writeBlob(sessionFilename, JSON.stringify(sessionObj));
+
+  return res.json({
+    ok: true,
+    alreadyExists: crmResult.alreadyExists,
+    sessionToken,
+    user: userObj
+  });
+});
+
+// Backend Auth Login Route
+app.post("/api/auth/login", async (req, res) => {
+  logAction("Incoming Login Request", { body: req.body });
+  const { email } = req.body ?? {};
+
+  if (!email) {
+    return res.status(400).json({ ok: false, error: "Email is required" });
+  }
+
+  const userFilename = `users/${email.toLowerCase()}.json`;
+  const userJson = await readBlob(userFilename);
+
+  if (!userJson) {
+    return res.status(404).json({ ok: false, errorType: "user_not_found", message: "Account not found. Please sign up first." });
+  }
+
+  const userObj = JSON.parse(userJson);
+
+  // Create Session (never call CRM during login)
+  const sessionToken = crypto.randomBytes(32).toString("hex");
+  const sessionFilename = `sessions/${sessionToken}.json`;
+  const sessionObj = { email: email.toLowerCase(), createdAt: new Date().toISOString() };
+  await writeBlob(sessionFilename, JSON.stringify(sessionObj));
+
+  return res.json({
+    ok: true,
+    sessionToken,
+    user: userObj
+  });
+});
+
+// Backend Auth Session validation Route
+app.get("/api/auth/session", async (req, res) => {
+  const authHeader = req.headers.authorization ?? "";
+  const token = authHeader.replace("Bearer ", "").trim();
+
+  if (!token) {
+    return res.status(401).json({ ok: false, error: "No token provided" });
+  }
+
+  const sessionFilename = `sessions/${token}.json`;
+  const sessionJson = await readBlob(sessionFilename);
+
+  if (!sessionJson) {
+    return res.status(401).json({ ok: false, error: "Session invalid or expired" });
+  }
+
+  const sessionObj = JSON.parse(sessionJson);
+  const userFilename = `users/${sessionObj.email}.json`;
+  const userJson = await readBlob(userFilename);
+
+  if (!userJson) {
+    return res.status(404).json({ ok: false, error: "User not found" });
+  }
+
+  return res.json({
+    ok: true,
+    user: JSON.parse(userJson)
+  });
+});
+
+// Logout Route
+app.post("/api/auth/logout", async (req, res) => {
+  const authHeader = req.headers.authorization ?? "";
+  const token = authHeader.replace("Bearer ", "").trim();
+
+  if (token) {
+    await deleteBlob(`sessions/${token}.json`);
+  }
+
+  return res.json({ ok: true });
+});
+
+// Contact Route
+app.post("/api/contact", async (req, res) => {
+  logAction("Incoming Contact Enquiry", { body: req.body });
+  const { name, phone, email, message, country } = req.body ?? {};
+
+  if (!name || !phone || !email || !country) {
+    return res.status(400).json({ ok: false, error: "Missing required fields" });
+  }
+
+  // Format phone number for CRM (e.g. 0041791234567)
+  const crmPhone = phone.replace("+", "00").replace(/\D/g, "");
+  const crmPayload = {
+    country_name: country.toLowerCase(),
+    description: message || "",
+    phone: crmPhone,
+    email,
+    first_name: name.split(" ")[0] || name,
+    last_name: name.split(" ").slice(1).join(" ") || "",
+    custom_fields: {
+      Source_ID: "Website",
+      Outline_Your_Case: message || ""
+    }
+  };
+
+  const crmResult = await submitToCRM(crmPayload);
+
+  if (!crmResult.success) {
+    return res.status(400).json({
+      ok: false,
+      errorType: "invalid_lead",
+      message: "We couldn't process your enquiry with the information provided. Please review your details and try again."
+    });
+  }
+
+  if (crmResult.alreadyExists) {
+    return res.json({
+      ok: true,
+      alreadyExists: true,
+      message: "It looks like you've already contacted us. We've recognized your details and will continue with your request."
+    });
+  }
+
+  // Increment Lead Dashboard
+  await incrementDashboard("contact", name, email);
+
+  // Optional: send local SMTP email if SMTP configured, else just skip
   const {
     SMTP_HOST,
     SMTP_PORT,
@@ -64,54 +433,31 @@ app.post("/api/contact", async (req, res) => {
     FROM_EMAIL,
   } = process.env;
 
-  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
-    console.log("SMTP not configured - logging form submission instead:");
-    console.log("Name:", name);
-    console.log("Phone:", phone);
-    console.log("Email:", email);
-    console.log("Message:", message);
-    return res.json({ ok: true, message: "Form logged successfully (SMTP not configured)" });
-  }
+  if (SMTP_HOST && SMTP_PORT && SMTP_USER && SMTP_PASS) {
+    try {
+      const transporter = nodemailer.createTransport({
+        host: SMTP_HOST,
+        port: Number(SMTP_PORT),
+        secure: SMTP_SECURE === "true",
+        auth: { user: SMTP_USER, pass: SMTP_PASS },
+        tls: { rejectUnauthorized: false }
+      });
+      const to = ADMIN_EMAIL || "info@orchiddental.co.uk";
+      const from = FROM_EMAIL || SMTP_USER;
 
-  const transporter = nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: Number(SMTP_PORT),
-    secure: SMTP_SECURE === "true",
-    auth: {
-      user: SMTP_USER,
-      pass: SMTP_PASS,
-    },
-    tls: {
-      rejectUnauthorized: false
+      await transporter.sendMail({
+        to,
+        from,
+        replyTo: email,
+        subject: `Website enquiry from ${name}`,
+        text: `Name: ${name}\nPhone: ${phone}\nEmail: ${email}\n\nMessage:\n${message}`,
+      });
+    } catch (e) {
+      logAction("Nodemailer Error", { error: e.message });
     }
-  });
-
-  const to = ADMIN_EMAIL || "info@orchiddental.co.uk";
-  const from = FROM_EMAIL || SMTP_USER;
-
-  try {
-    // 1. Send the inquiry alert to the admin in the background
-    transporter.sendMail({
-      to,
-      from,
-      replyTo: email,
-      subject: `Website enquiry from ${name}`,
-      text: `Name: ${name}\nPhone: ${phone}\nEmail: ${email}\n\nMessage:\n${message}`,
-    }).catch(err => console.error("Admin Email send failed:", err));
-
-    // 2. Send a confirmation auto-response to the customer who filled out the form in the background
-    transporter.sendMail({
-      to: email,
-      from,
-      subject: `Thank you for contacting Orchid Dental`,
-      text: `Hi ${name},\n\nThank you for contacting Orchid Dental. We have received your message and our team will get back to you shortly.\n\nHere is a copy of your message:\n"${message}"\n\nBest regards,\nThe Orchid Dental Team`,
-    }).catch(err => console.error("User Email send failed:", err));
-
-    return res.json({ ok: true });
-  } catch (err) {
-    console.error("Contact API error:", err);
-    return res.status(500).json({ ok: false, error: "Failed to process request" });
   }
+
+  return res.json({ ok: true, alreadyExists: false });
 });
 
 // Backend SEO Setup
@@ -123,7 +469,7 @@ app.get('/robots.txt', (req, res) => {
 app.get('/sitemap.xml', (req, res) => {
   res.type('application/xml');
   const baseUrl = "https://orchiddental.co.uk";
-  const routes = ['', '/booking', '/contact', '/fees', '/team', '/treatments'];
+  const routes = ['', '/booking', '/contact', '/fees', '/team', '/treatments', '/dashboard', '/privacy-policy', '/terms'];
   
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
   xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
@@ -147,6 +493,9 @@ const SEO_MAP = {
   '/team': { title: 'Our Team | Orchid Dental Experts', desc: 'Meet our highly experienced and friendly dental professionals at Orchid Dental.' },
   '/fees': { title: 'Fees & Pricing | Orchid Dental', desc: 'Transparent dental fees and pricing for our premium treatments in London.' },
   '/treatments': { title: 'Dental Treatments | Orchid Dental', desc: 'Explore our wide range of professional dental treatments and cosmetic procedures.' },
+  '/dashboard': { title: 'Crypto Experience | Orchid Dental Portal', desc: 'Explore educational resources on cryptocurrency basics, blockchain, digital assets, and risk management.' },
+  '/privacy-policy': { title: 'Privacy Policy | Orchid Dental', desc: 'Read our Privacy Policy to understand how we collect, use, and protect your information.' },
+  '/terms': { title: 'Terms & Conditions | Orchid Dental', desc: 'Read our Terms & Conditions of service.' }
 };
 
 // SPA fallback: serve index.html for non-static routes, injecting SEO dynamically
@@ -159,7 +508,7 @@ app.get("*", async (req, res) => {
     const route = req.path;
     const seo = SEO_MAP[route] || SEO_MAP['/'];
     
-    // Enhanced JSON-LD Schema for MedicalClinic (Dentist) with hyper-specific Treatments
+    // Enhanced JSON-LD Schema
     const jsonLd = {
       "@context": "https://schema.org",
       "@type": ["Dentist", "MedicalClinic", "LocalBusiness"],
@@ -181,26 +530,11 @@ app.get("*", async (req, res) => {
           "opens": "09:00",
           "closes": "17:00"
         }
-      ],
-      "medicalSpecialty": ["Dentistry", "Cosmetic Dentistry"],
-      "availableService": [
-        { "@type": "MedicalProcedure", "name": "Teeth Whitening" },
-        { "@type": "MedicalProcedure", "name": "Invisalign" },
-        { "@type": "MedicalProcedure", "name": "Dental Implants" },
-        { "@type": "MedicalProcedure", "name": "Hygiene Therapy" },
-        { "@type": "MedicalProcedure", "name": "Composite Bonding" }
-      ],
-      "areaServed": [
-        { "@type": "City", "name": "London" },
-        { "@type": "City", "name": "Willesden" },
-        { "@type": "City", "name": "Dollis Hill" }
       ]
     };
 
-    // Extreme SEO - Target exactly what people mistype
-    const misspelledKeywords = "orhid dental, orcid dental, orched dental, orchard dental, dentist willesden, dentis nw10, teath dr london, ortid dental, orchid dentle, best dentst london, orhid dentl, orhid dntlist";
+    const misspelledKeywords = "orhid dental, orcid dental, orched dental, orchard dental, dentist willesden, dentis nw10, teath dr london";
 
-    // Create Advanced meta tags
     const metaTags = `
     <!-- Ultra-Powerful Backend SEO -->
     <title>${seo.title}</title>
@@ -223,7 +557,6 @@ app.get("*", async (req, res) => {
     <!-- End Ultra-Powerful Backend SEO -->
     `;
 
-    // Inject before </head>
     html = html.replace('</head>', `${metaTags}\n</head>`);
     
     res.send(html);

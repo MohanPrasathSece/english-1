@@ -1,5 +1,5 @@
-import { useState, FormEvent, useRef } from "react";
-import { Phone, Mail, MapPin, Clock, CheckCircle2 } from "lucide-react";
+import { useState, FormEvent, useRef, useEffect } from "react";
+import { Phone as PhoneIcon, Mail, MapPin, Clock, CheckCircle2, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import FadeInView from "@/components/FadeInView";
@@ -7,41 +7,79 @@ import PageBanner from "@/components/PageBanner";
 import CTASection from "@/components/CTASection";
 import SEO from "@/components/SEO";
 import bannerImage from "@/assets/banner-contact.jpg";
+import CountryDropdown, { countries, Country, cleanPhoneNumber } from "../components/CountryDropdown";
 
-const Contact = () => {
+interface ContactProps {
+  user?: any;
+}
+
+const Contact = ({ user }: ContactProps) => {
   const [sending, setSending] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
+  
+  // Form fields
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phoneVal, setPhoneVal] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState<Country>(countries[0]);
+  const [message, setMessage] = useState("");
+
+  // Pre-fill user data if logged in
+  useEffect(() => {
+    if (user) {
+      setName(user.name || "");
+      setEmail(user.email || "");
+      setPhoneVal(user.phone || "");
+      const foundCountry = countries.find(c => c.iso === user.country);
+      if (foundCountry) {
+        setSelectedCountry(foundCountry);
+      }
+    }
+  }, [user]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSending(true);
 
-    const formData = new FormData(e.currentTarget);
-    const name = (formData.get("name") as string) || "";
-    const phone = (formData.get("phone") as string) || "";
-    const email = (formData.get("email") as string) || "";
-    const message = (formData.get("message") as string) || "";
+    const cleanDigits = cleanPhoneNumber(phoneVal, selectedCountry.dialCode);
+    const isValid = selectedCountry.regex.test(cleanDigits);
+
+    if (!isValid) {
+      toast.error(`Invalid phone number. Example for ${selectedCountry.name}: ${selectedCountry.example}`);
+      setSending(false);
+      return;
+    }
+
+    const formattedPhone = `+${selectedCountry.dialCode}${cleanDigits}`;
 
     try {
-      // Start the fetch and a 2-second timer simultaneously
-      const fetchPromise = fetch("/api/contact", {
+      const resp = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, email, message }),
+        body: JSON.stringify({
+          name,
+          email,
+          phone: formattedPhone,
+          country: selectedCountry.iso,
+          message,
+        }),
       });
-      const timerPromise = new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Wait for both to complete
-      const [resp] = await Promise.all([fetchPromise, timerPromise]);
-
+      const data = await resp.json();
       if (!resp.ok) {
-        const data = (await resp.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(data?.error || "Request failed");
+        toast.error(data.message || "We couldn't process your enquiry with the information provided.");
+        setSending(false);
+        return;
       }
 
-      if (formRef.current) formRef.current.reset();
-      setShowSuccessDialog(true);
+      if (data.alreadyExists) {
+        toast.info(data.message || "It looks like you've already contacted us. We've recognized your details and will continue with your request.");
+      } else {
+        setShowSuccessDialog(true);
+      }
+
+      // Reset form message
+      setMessage("");
     } catch (error) {
       console.error("Contact form error:", error);
       toast.error("Failed to send message. Please try again or use the phone number.");
@@ -72,7 +110,7 @@ const Contact = () => {
               <div className="space-y-6">
                 <div className="p-8 rounded-2xl bg-card shadow-medical space-y-4">
                   <div className="flex items-start gap-3">
-                    <Phone size={20} className="text-primary mt-0.5" />
+                    <PhoneIcon size={20} className="text-primary mt-0.5" />
                     <div>
                       <p className="text-base font-medium text-foreground">Phone</p>
                       <a href="tel:02084592626" className="text-base text-muted font-mono hover:text-primary transition-colors">020 8459 2626</a>
@@ -109,28 +147,64 @@ const Contact = () => {
             <FadeInView delay={0.15}>
               <div className="bg-white rounded-2xl shadow-lg p-8">
                 <h2 className="text-xl font-bold text-foreground mb-2">Send us a message</h2>
-                <form id="contact-form" ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+                <form id="contact-form" onSubmit={handleSubmit} className="space-y-6">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>
-                    <input required name="name" type="text" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm" placeholder="John Smith" />
+                    <input 
+                      required 
+                      name="name" 
+                      type="text" 
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm" 
+                      placeholder="John Smith" 
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Phone</label>
-                    <input required name="phone" type="tel" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm font-mono" placeholder="0412 345 678" />
+                    <div className="flex gap-2">
+                      <CountryDropdown selectedCountry={selectedCountry} onChange={setSelectedCountry} />
+                      <input 
+                        required 
+                        name="phone" 
+                        type="tel" 
+                        value={phoneVal}
+                        onChange={(e) => setPhoneVal(e.target.value)}
+                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm font-mono" 
+                        placeholder={selectedCountry.example} 
+                      />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Email</label>
-                    <input required name="email" type="email" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm" placeholder="john@example.com" />
+                    <input 
+                      required 
+                      name="email" 
+                      type="email" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm" 
+                      placeholder="john@example.com" 
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Message</label>
-                    <textarea required name="message" rows={4} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm resize-none" placeholder="Tell us about your needs..." />
+                    <textarea 
+                      required 
+                      name="message" 
+                      rows={4} 
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm resize-none" 
+                      placeholder="Tell us about your needs..." 
+                    />
                   </div>
                   <button
                     type="submit"
                     disabled={sending}
-                    className="w-full px-6 py-3 rounded-lg bg-primary text-primary-foreground font-semibold hover:brightness-110 active:scale-95 transition-all duration-200 disabled:opacity-50 text-base"
+                    className="w-full px-6 py-3 rounded-lg bg-primary text-primary-foreground font-semibold hover:brightness-110 active:scale-95 transition-all duration-200 disabled:opacity-50 text-base flex items-center justify-center gap-2"
                   >
+                    {sending && <Loader2 size={16} className="animate-spin" />}
                     {sending ? "Sending..." : "Send Message"}
                   </button>
                 </form>
@@ -200,4 +274,3 @@ const Contact = () => {
 };
 
 export default Contact;
-
