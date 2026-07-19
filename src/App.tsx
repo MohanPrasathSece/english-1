@@ -7,17 +7,11 @@ import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import ScrollToTopOnNav from "@/components/ScrollToTopOnNav";
 import Home from "./pages/Home";
-import Team from "./pages/Team";
-import Treatments from "./pages/Treatments";
-import Fees from "./pages/Fees";
-import Contact from "./pages/Contact";
-import Booking from "./pages/Booking";
 import NotFound from "./pages/NotFound";
 import CryptoExperience from "./pages/CryptoExperience";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import AuthModal from "@/components/AuthModal";
-
 import { HelmetProvider } from "react-helmet-async";
 
 const App = () => {
@@ -26,25 +20,20 @@ const App = () => {
     localStorage.getItem("sessionToken")
   );
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState<"login" | "signup">("signup");
   const [checkingSession, setCheckingSession] = useState(!!sessionToken);
 
   useEffect(() => {
     const verifySession = async () => {
-      if (!sessionToken) {
-        setCheckingSession(false);
-        return;
-      }
+      if (!sessionToken) { setCheckingSession(false); return; }
       try {
         const res = await fetch("/api/auth/session", {
-          headers: {
-            Authorization: `Bearer ${sessionToken}`,
-          },
+          headers: { Authorization: `Bearer ${sessionToken}` },
         });
         if (res.ok) {
           const data = await res.json();
           setUser(data.user);
         } else {
-          // Token expired or invalid
           localStorage.removeItem("sessionToken");
           setUser(null);
           setSessionToken(null);
@@ -55,7 +44,6 @@ const App = () => {
         setCheckingSession(false);
       }
     };
-
     verifySession();
   }, [sessionToken]);
 
@@ -70,9 +58,7 @@ const App = () => {
       try {
         await fetch("/api/auth/logout", {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${sessionToken}`,
-          },
+          headers: { Authorization: `Bearer ${sessionToken}` },
         });
       } catch (err) {
         console.error("Logout request failed", err);
@@ -81,6 +67,11 @@ const App = () => {
     localStorage.removeItem("sessionToken");
     setSessionToken(null);
     setUser(null);
+  };
+
+  const openAuth = (tab: "login" | "signup" = "signup") => {
+    setAuthModalTab(tab);
+    setAuthModalOpen(true);
   };
 
   return (
@@ -93,25 +84,20 @@ const App = () => {
             <Navbar
               user={user}
               onLogout={handleLogout}
-              onOpenAuth={() => setAuthModalOpen(true)}
+              onOpenAuth={openAuth}
             />
             <main className="flex-1">
               <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/team" element={<Team />} />
-                <Route path="/treatments" element={<Treatments />} />
-                <Route path="/fees" element={<Fees />} />
-                <Route
-                  path="/contact"
-                  element={<Contact user={user} />}
-                />
-                <Route path="/booking" element={<Booking />} />
+                <Route path="/" element={<Home onOpenAuth={openAuth} user={user} />} />
                 <Route
                   path="/dashboard"
                   element={
                     checkingSession ? (
-                      <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
-                        Verifying session...
+                      <div className="min-h-screen flex items-center justify-center bg-background">
+                        <div className="flex flex-col items-center gap-4">
+                          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                          <p className="text-muted-foreground text-sm">Verifying session...</p>
+                        </div>
                       </div>
                     ) : user ? (
                       <CryptoExperience user={user} />
@@ -125,7 +111,7 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
-            <Footer />
+            <Footer onOpenAuth={openAuth} />
             <ScrollToTop />
           </div>
 
@@ -133,6 +119,7 @@ const App = () => {
             isOpen={authModalOpen}
             onClose={() => setAuthModalOpen(false)}
             onSuccess={handleLoginSuccess}
+            initialTab={authModalTab}
           />
         </BrowserRouter>
       </TooltipProvider>

@@ -6,44 +6,47 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const links = [
   { to: "/", label: "Home" },
-  { to: "/privacy-policy", label: "Privacy Policy" },
+  { to: "/privacy-policy", label: "Privacy" },
   { to: "/terms", label: "Terms" },
 ];
 
 interface NavbarProps {
   user: any;
   onLogout: () => void;
-  onOpenAuth: () => void;
+  onOpenAuth: (tab?: "login" | "signup") => void;
 }
 
 const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleNavClick = (to: string) => {
-    if (location.pathname === to) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    if (location.pathname === to) window.scrollTo({ top: 0, behavior: "smooth" });
     setMobileOpen(false);
   };
 
   useEffect(() => {
     if (!mobileOpen) return;
-
-    const prevOverflow = document.body.style.overflow;
+    const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = prevOverflow;
-    };
+    return () => { document.body.style.overflow = prev; };
   }, [mobileOpen]);
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-md bg-background/80 border-b border-border">
+    <nav className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? "backdrop-blur-xl bg-background/95 shadow-md border-b border-border" : "backdrop-blur-md bg-background/80 border-b border-border"}`}>
       <div className="container mx-auto flex items-center justify-between py-4 px-6">
-        <Link to="/" className="flex items-center gap-2">
-          <Shield className="text-primary w-8 h-8" />
-          <span className="text-xl font-bold tracking-tight font-sans text-foreground">
+        <Link to="/" className="flex items-center gap-2 group">
+          <motion.div whileHover={{ rotate: 15 }} transition={{ type: "spring", stiffness: 300 }}>
+            <Shield className="text-primary w-7 h-7" />
+          </motion.div>
+          <span className="text-xl font-bold tracking-tight text-foreground">
             Asset<span className="text-primary">Circle</span>
           </span>
         </Link>
@@ -73,7 +76,7 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
               onClick={() => handleNavClick("/dashboard")}
               className="relative px-4 py-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors duration-200"
             >
-              Portal Dashboard
+              My Portal
               {location.pathname === "/dashboard" && (
                 <motion.div
                   layoutId="nav-underline"
@@ -88,23 +91,33 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
         <div className="hidden lg:flex items-center gap-3">
           {user ? (
             <div className="flex items-center gap-3">
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <User size={14} /> {user.name}
+              <span className="text-xs text-muted-foreground flex items-center gap-1.5 bg-secondary px-3 py-1.5 rounded-full border border-border">
+                <User size={13} /> {user.name}
               </span>
               <button
                 onClick={onLogout}
-                className="inline-flex items-center gap-1 px-4 py-2.5 rounded-lg bg-red-50 text-red-500 text-sm font-semibold hover:bg-red-100 border border-red-200 transition-colors duration-200"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-red-50 text-red-500 text-sm font-semibold hover:bg-red-100 border border-red-200 transition-colors duration-200"
               >
                 <LogOut size={14} /> Logout
               </button>
             </div>
           ) : (
-            <button
-              onClick={onOpenAuth}
-              className="inline-flex items-center px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:brightness-110 active:scale-95 transition-all duration-200"
-            >
-              Client Access
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onOpenAuth("login")}
+                className="px-4 py-2 text-sm font-semibold text-foreground hover:text-primary transition-colors duration-200"
+              >
+                Login
+              </button>
+              <motion.button
+                onClick={() => onOpenAuth("signup")}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="inline-flex items-center px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:brightness-110 transition-all duration-200 shadow-sm"
+              >
+                Get Started
+              </motion.button>
+            </div>
           )}
         </div>
 
@@ -134,17 +147,15 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMobileOpen(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-md"
-              aria-label="Close menu"
+              className="fixed inset-0 bg-black/30 backdrop-blur-sm"
             />
-
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
-              className="fixed top-6 right-6 z-50 p-3 rounded-full bg-slate-900/50 backdrop-blur-sm text-white hover:bg-slate-800 transition-colors"
+              className="fixed top-6 right-6 z-50 p-3 rounded-full bg-card border border-border shadow-lg text-foreground"
               aria-label="Close menu"
             >
-              <X size={24} />
+              <X size={20} />
             </button>
 
             <motion.div
@@ -158,7 +169,6 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
                 <nav className="space-y-2">
                   {links.map((link, i) => {
                     const active = location.pathname === link.to;
-
                     return (
                       <motion.div
                         key={link.to}
@@ -171,41 +181,30 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
                           onClick={() => handleNavClick(link.to)}
                           className={
                             "flex items-center justify-between rounded-2xl px-5 py-4 text-base font-medium transition-colors " +
-                            (active
-                              ? "bg-primary/10 text-primary"
-                              : "text-muted-foreground hover:text-foreground hover:bg-secondary")
+                            (active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-secondary")
                           }
                         >
                           <span>{link.label}</span>
-                          <ChevronRight size={18} className={active ? "text-primary" : "text-slate-500"} />
+                          <ChevronRight size={18} className={active ? "text-primary" : "text-muted-foreground"} />
                         </Link>
                       </motion.div>
                     );
                   })}
 
                   {user && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.25 }}
-                    >
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
                       <Link
                         to="/dashboard"
                         onClick={() => handleNavClick("/dashboard")}
-                        className={
-                          "flex items-center justify-between rounded-2xl px-5 py-4 text-base font-semibold transition-colors " +
-                          (location.pathname === "/dashboard"
-                            ? "bg-primary/10 text-primary"
-                            : "text-primary hover:bg-primary/5")
-                        }
+                        className={"flex items-center justify-between rounded-2xl px-5 py-4 text-base font-semibold transition-colors " +
+                          (location.pathname === "/dashboard" ? "bg-primary/10 text-primary" : "text-primary hover:bg-primary/5")}
                       >
-                        <span>Portal Dashboard</span>
+                        <span>My Portal</span>
                         <ChevronRight size={18} className="text-primary" />
                       </Link>
                     </motion.div>
                   )}
 
-                  {/* Portal Button / User Info */}
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -218,25 +217,27 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
                           <User size={14} /> Logged in: {user.name}
                         </div>
                         <button
-                          onClick={() => {
-                            onLogout();
-                            setMobileOpen(false);
-                          }}
-                          className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-2xl bg-red-500/10 text-red-400 font-semibold text-sm hover:bg-red-500/20 transition-colors"
+                          onClick={() => { onLogout(); setMobileOpen(false); }}
+                          className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-2xl bg-red-50 text-red-500 font-semibold text-sm border border-red-200"
                         >
                           <LogOut size={16} /> Logout
                         </button>
                       </div>
                     ) : (
-                      <button
-                        onClick={() => {
-                          onOpenAuth();
-                          setMobileOpen(false);
-                        }}
-                        className="w-full px-5 py-3.5 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm hover:brightness-110 active:scale-95 transition-all text-center"
-                      >
-                        Client Access
-                      </button>
+                      <div className="flex flex-col gap-2">
+                        <button
+                          onClick={() => { onOpenAuth("login"); setMobileOpen(false); }}
+                          className="w-full px-5 py-3 rounded-2xl border border-border text-foreground font-semibold text-sm hover:bg-secondary transition-all"
+                        >
+                          Already have an account? Login
+                        </button>
+                        <button
+                          onClick={() => { onOpenAuth("signup"); setMobileOpen(false); }}
+                          className="w-full px-5 py-3.5 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm hover:brightness-110 active:scale-95 transition-all text-center"
+                        >
+                          Get Started — It's Free
+                        </button>
+                      </div>
                     )}
                   </motion.div>
                 </nav>

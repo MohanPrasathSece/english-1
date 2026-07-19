@@ -1,422 +1,235 @@
-import { useState, useEffect, FormEvent } from "react";
-import { ShieldCheck, TrendingUp, Cpu, Award, MessageSquare, Loader2, ArrowUpRight, HelpCircle } from "lucide-react";
-import { motion } from "framer-motion";
-import { toast } from "sonner";
-import CountryDropdown, { countries, Country, cleanPhoneNumber } from "../components/CountryDropdown";
+import { useState, useEffect } from "react";
+import { ShieldCheck, TrendingUp, Cpu, Award, ArrowUpRight, Activity, Bell, Wallet, BarChart3, Clock, CheckCircle2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import SEO from "@/components/SEO";
 
 interface CryptoExperienceProps {
   user: any;
+  onLogout?: () => void;
 }
 
 export default function CryptoExperience({ user }: CryptoExperienceProps) {
-  const [activeTab, setActiveTab] = useState<"basics" | "security" | "trends">("basics");
-  const [submitting, setSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState<"overview" | "ai-yield" | "vault">("overview");
 
-  // Form states initialized with logged-in user details if available
-  const [name, setName] = useState(user?.name || "");
-  const [email, setEmail] = useState(user?.email || "");
-  const [phoneVal, setPhoneVal] = useState(user?.phone || "");
-  const [selectedCountry, setSelectedCountry] = useState<Country>(
-    countries.find(c => c.iso === user?.country) || countries[0]
-  );
-  const [message, setMessage] = useState("");
-
-  const handleContactSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-
-    const cleanDigits = cleanPhoneNumber(phoneVal, selectedCountry.dialCode);
-    const isValid = selectedCountry.regex.test(cleanDigits);
-
-    if (!isValid) {
-      toast.error(`Invalid phone number. Example for ${selectedCountry.name}: ${selectedCountry.example}`);
-      setSubmitting(false);
-      return;
-    }
-
-    const formattedPhone = `+${selectedCountry.dialCode}${cleanDigits}`;
-
-    try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          email,
-          phone: formattedPhone,
-          country: selectedCountry.iso,
-          message,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        toast.error(data.message || "We couldn't process your enquiry with the information provided.");
-        setSubmitting(false);
-        return;
-      }
-
-      if (data.alreadyExists) {
-        toast.info(data.message || "Enquiry already registered.");
-      } else {
-        toast.success("Thank you! Your enquiry has been processed successfully.");
-      }
-
-      setMessage("");
-    } catch (err) {
-      toast.error("Failed to submit enquiry. Please check your network and try again.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // Simulating live prices
-  const [btcPrice, setBtcPrice] = useState(94250);
-  const [ethPrice, setEthPrice] = useState(3180);
+  // Mock live data for the dashboard
+  const [btcPrice, setBtcPrice] = useState(94250.50);
+  const [ethPrice, setEthPrice] = useState(3180.20);
+  const [totalYield, setTotalYield] = useState(14.24);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setBtcPrice(prev => prev + (Math.random() - 0.5) * 50);
-      setEthPrice(prev => prev + (Math.random() - 0.5) * 5);
-    }, 2000);
+      setBtcPrice(prev => prev + (Math.random() - 0.5) * 40);
+      setEthPrice(prev => prev + (Math.random() - 0.5) * 4);
+      setTotalYield(prev => prev + (Math.random() * 0.001));
+    }, 2500);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 overflow-hidden relative pb-20">
-      {/* Decorative Ornaments (Floating Crypto Illustrations / Blur Blobs) */}
-      <div className="absolute top-1/4 left-1/10 w-96 h-96 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/10 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-background text-foreground pb-20">
+      <SEO title="My Portal | Asset Circle" canonical="/dashboard" />
 
-      {/* Main Header / Hero */}
-      <header className="relative z-10 pt-20 pb-10 text-center max-w-4xl mx-auto px-6">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-wider mb-6">
-          <Cpu size={14} className="animate-spin" /> Next-Generation Digital Assets
-        </div>
-        <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 font-rossetti tracking-tight">
-          Welcome to the <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Crypto Experience</span>
-        </h1>
-        <p className="text-lg text-slate-300 leading-relaxed max-w-2xl mx-auto">
-          Explore institutional-grade insights, real-time market dynamics, and advanced safety standards built for modern digital asset investment.
-        </p>
-      </header>
+      {/* Dashboard Header */}
+      <div className="bg-card border-b border-border pt-24 pb-8">
+        <div className="container mx-auto px-6 max-w-6xl">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col md:flex-row md:items-center justify-between gap-6"
+          >
+            <div>
+              <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-1">Client Portal</p>
+              <h1 className="text-3xl font-extrabold text-foreground">
+                Welcome back, {user?.name?.split(' ')[0] || "Investor"}
+              </h1>
+              <p className="text-muted-foreground mt-1 text-sm flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                Secure session active from {user?.country || "Global"}
+              </p>
+            </div>
 
-      {/* Real-time Crypto Stats Ticker */}
-      <div className="container mx-auto px-6 mb-12 relative z-10">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-          <div className="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 p-4 rounded-xl flex items-center justify-between">
-            <div>
-              <p className="text-xs text-slate-400 font-semibold uppercase">Bitcoin (BTC)</p>
-              <h4 className="text-lg font-mono font-bold text-white mt-1">${btcPrice.toFixed(2)}</h4>
+            <div className="flex gap-4">
+              <div className="bg-secondary border border-border px-4 py-2.5 rounded-xl shadow-sm">
+                <p className="text-xs text-muted-foreground uppercase font-semibold mb-0.5">Account Status</p>
+                <p className="text-sm font-bold text-foreground flex items-center gap-1.5">
+                  <ShieldCheck size={16} className="text-green-500" /> Fully Verified
+                </p>
+              </div>
+              <button className="bg-primary/10 text-primary p-3 rounded-xl hover:bg-primary/20 transition-colors border border-primary/20">
+                <Bell size={20} />
+              </button>
             </div>
-            <ArrowUpRight className="text-green-400" size={18} />
-          </div>
-          <div className="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 p-4 rounded-xl flex items-center justify-between">
-            <div>
-              <p className="text-xs text-slate-400 font-semibold uppercase">Ethereum (ETH)</p>
-              <h4 className="text-lg font-mono font-bold text-white mt-1">${ethPrice.toFixed(2)}</h4>
-            </div>
-            <ArrowUpRight className="text-green-400" size={18} />
-          </div>
-          <div className="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 p-4 rounded-xl">
-            <p className="text-xs text-slate-400 font-semibold uppercase">AI Yield Boost</p>
-            <h4 className="text-lg font-bold text-indigo-400 mt-1">+14.2% APY</h4>
-          </div>
-          <div className="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 p-4 rounded-xl">
-            <p className="text-xs text-slate-400 font-semibold uppercase">Secured Assets</p>
-            <h4 className="text-lg font-bold text-emerald-400 mt-1">100% Cold Storage</h4>
-          </div>
+          </motion.div>
         </div>
       </div>
 
-      {/* Mac-style Browser Window containing tabs and sections */}
-      <section className="container mx-auto px-6 max-w-5xl relative z-10 mb-20">
-        <div className="bg-slate-800/30 backdrop-blur-lg border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden">
-          {/* Mac Browser Header */}
-          <div className="bg-slate-900/60 border-b border-slate-800 px-4 py-3 flex items-center justify-between">
-            {/* Window controls */}
-            <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
-              <span className="w-3 h-3 rounded-full bg-yellow-500/80 inline-block" />
-              <span className="w-3 h-3 rounded-full bg-green-500/80 inline-block" />
-            </div>
-
-            {/* Mac Tabs */}
-            <div className="flex gap-1.5">
-              <button
-                onClick={() => setActiveTab("basics")}
-                className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  activeTab === "basics"
-                    ? "bg-slate-800 text-white shadow-sm"
-                    : "text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                Crypto Basics
-              </button>
-              <button
-                onClick={() => setActiveTab("security")}
-                className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  activeTab === "security"
-                    ? "bg-slate-800 text-white shadow-sm"
-                    : "text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                Growth & Security
-              </button>
-              <button
-                onClick={() => setActiveTab("trends")}
-                className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  activeTab === "trends"
-                    ? "bg-slate-800 text-white shadow-sm"
-                    : "text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                Market Analysis & FAQ
-              </button>
-            </div>
-
-            <div className="text-[11px] text-slate-500 font-mono hidden md:block">
-              https://orchiddental.co.uk/portal
-            </div>
-          </div>
-
-          {/* Browser Window Body */}
-          <div className="p-6 md:p-10">
-            {activeTab === "basics" && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-8"
-              >
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-3">Understanding Cryptocurrency & Blockchain</h3>
-                  <p className="text-slate-300 leading-relaxed">
-                    Cryptocurrencies represent a paradigm shift in financial sovereignty. Built on decentralized peer-to-peer protocols, these digital assets exist without a central counterparty, guaranteeing trustless transparency through cryptographic proof.
-                  </p>
-                </div>
-
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div className="bg-slate-800/40 border border-slate-700/40 p-5 rounded-xl">
-                    <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-3">
-                      <TrendingUp size={20} />
-                    </div>
-                    <h4 className="text-base font-semibold text-white mb-2">Digital Assets</h4>
-                    <p className="text-xs text-slate-400 leading-relaxed">
-                      From smart contract protocols like Ethereum to stores-of-value like Bitcoin, digital assets redefine collateral standards.
-                    </p>
-                  </div>
-
-                  <div className="bg-slate-800/40 border border-slate-700/40 p-5 rounded-xl">
-                    <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-3">
-                      <Cpu size={20} />
-                    </div>
-                    <h4 className="text-base font-semibold text-white mb-2">Blockchain Mechanics</h4>
-                    <p className="text-xs text-slate-400 leading-relaxed">
-                      Immputable ledgers grouped by blocks, cryptographically linked and verified through globally distributed network nodes.
-                    </p>
-                  </div>
-
-                  <div className="bg-slate-800/40 border border-slate-700/40 p-5 rounded-xl">
-                    <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-3">
-                      <Award size={20} />
-                    </div>
-                    <h4 className="text-base font-semibold text-white mb-2">Crypto Investing</h4>
-                    <p className="text-xs text-slate-400 leading-relaxed">
-                      Learn the fundamentals of spot markets, trading pairs, liquidity pools, and dollar-cost averaging (DCA) frameworks.
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab === "security" && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-8"
-              >
-                {/* 2 Core Concepts: Improving Investment & Safety */}
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <TrendingUp className="text-primary" size={28} />
-                      <h3 className="text-xl font-bold text-white">How We Improve Your Investment Amount</h3>
-                    </div>
-                    <p className="text-sm text-slate-300 leading-relaxed">
-                      By utilizing state-of-the-art AI market analysis and automated portfolio rebalancing, our systems detect macroeconomic cycles and micro-trends ahead of standard market participants.
-                    </p>
-                    <ul className="space-y-2 text-xs text-slate-400 list-disc list-inside">
-                      <li>Strategic asset rebalancing</li>
-                      <li>AI-driven downside hedging protocols</li>
-                      <li>Institutional liquidity yield generation</li>
-                    </ul>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <ShieldCheck className="text-emerald-400" size={28} />
-                      <h3 className="text-xl font-bold text-white">How Safe & Secure is Your Capital?</h3>
-                    </div>
-                    <p className="text-sm text-slate-300 leading-relaxed">
-                      Security is our core priority. 100% of reserves are secured in multi-signature cold wallets managed by top-tier custodians, insulated from hot-network exploits and single-point failures.
-                    </p>
-                    <ul className="space-y-2 text-xs text-slate-400 list-disc list-inside">
-                      <li>Offline cold-storage custodianship</li>
-                      <li>Multi-signature authorization flows</li>
-                      <li>Full collateralization audit logs</li>
-                    </ul>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab === "trends" && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-8"
-              >
-                {/* Live Candlestick Graph (SVG Mockup) */}
-                <div>
-                  <h4 className="text-sm font-semibold text-slate-400 mb-3 uppercase tracking-wider">Trading Candlestick & Market Trends</h4>
-                  <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-xs font-semibold text-slate-300">VertexIQ Realtime Index Chart</span>
-                      <span className="text-xs text-green-400 font-mono">+4.8% Today</span>
-                    </div>
-                    <svg viewBox="0 0 500 120" className="w-full h-24">
-                      {/* Candlesticks */}
-                      <line x1="40" y1="20" x2="40" y2="80" stroke="#ef4444" strokeWidth="2" />
-                      <rect x="36" y="30" width="8" height="35" fill="#ef4444" />
-
-                      <line x1="80" y1="40" x2="80" y2="100" stroke="#10b981" strokeWidth="2" />
-                      <rect x="76" y="45" width="8" height="40" fill="#10b981" />
-
-                      <line x1="120" y1="10" x2="120" y2="70" stroke="#10b981" strokeWidth="2" />
-                      <rect x="116" y="20" width="8" height="45" fill="#10b981" />
-
-                      <line x1="160" y1="50" x2="160" y2="90" stroke="#ef4444" strokeWidth="2" />
-                      <rect x="156" y="55" width="8" height="25" fill="#ef4444" />
-
-                      <line x1="200" y1="30" x2="200" y2="90" stroke="#10b981" strokeWidth="2" />
-                      <rect x="196" y="35" width="8" height="45" fill="#10b981" />
-
-                      <line x1="240" y1="15" x2="240" y2="70" stroke="#10b981" strokeWidth="2" />
-                      <rect x="236" y="20" width="8" height="40" fill="#10b981" />
-
-                      {/* Sparkline overlay */}
-                      <path
-                        d="M 40 47 L 80 65 L 120 42 L 160 67 L 200 57 L 240 40 L 280 25 L 320 35 L 360 20 L 400 15 L 440 22 L 480 12"
-                        fill="none"
-                        stroke="#3b82f6"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </div>
-                </div>
-
-                {/* FAQ Section */}
-                <div className="space-y-4">
-                  <h4 className="text-base font-bold text-white flex items-center gap-2">
-                    <HelpCircle size={18} className="text-primary" /> Common Questions
-                  </h4>
-                  <div className="space-y-3">
-                    <details className="bg-slate-800/30 p-3 rounded-lg border border-slate-700/30 cursor-pointer">
-                      <summary className="text-xs font-semibold text-slate-200">How do we guarantee fund safety?</summary>
-                      <p className="text-xs text-slate-400 mt-2">
-                        We leverage cold-storage hardware keys secured offline in vault locations, preventing internet connectivity or software vulnerability risk.
-                      </p>
-                    </details>
-                    <details className="bg-slate-800/30 p-3 rounded-lg border border-slate-700/30 cursor-pointer">
-                      <summary className="text-xs font-semibold text-slate-200">What are the fees associated with this platform?</summary>
-                      <p className="text-xs text-slate-400 mt-2">
-                        We believe in full transparency. There are 0% deposit/withdrawal commissions, and we only collect a standard performance yield cut on profits.
-                      </p>
-                    </details>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Logged-in contact form */}
-      <section className="container mx-auto px-6 max-w-2xl relative z-10">
-        <div className="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 p-6 md:p-8 rounded-2xl">
-          <div className="flex items-center gap-3 mb-4">
-            <MessageSquare className="text-primary" size={24} />
-            <h3 className="text-xl font-bold text-white">Ask an Expert</h3>
-          </div>
-          <p className="text-sm text-slate-400 mb-6">
-            Have questions about digital asset safety, blockchain systems, or AI-driven growth? Get in touch directly.
-          </p>
-
-          <form onSubmit={handleContactSubmit} className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Full Name</label>
-                <input
-                  required
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-primary transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Email Address</label>
-                <input
-                  required
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-primary transition-all"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Phone Number</label>
-              <div className="flex gap-2">
-                <CountryDropdown selectedCountry={selectedCountry} onChange={setSelectedCountry} />
-                <input
-                  required
-                  type="tel"
-                  placeholder={selectedCountry.example}
-                  value={phoneVal}
-                  onChange={(e) => setPhoneVal(e.target.value)}
-                  className="flex-1 px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-primary transition-all font-mono"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Message (Optional)</label>
-              <textarea
-                rows={3}
-                placeholder="Type your question here..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-primary transition-all resize-none"
-              />
-            </div>
-
+      <div className="container mx-auto px-6 max-w-6xl mt-8">
+        {/* Navigation Tabs */}
+        <div className="flex overflow-x-auto pb-2 mb-8 gap-2 no-scrollbar">
+          {[
+            { id: "overview", icon: BarChart3, label: "Portfolio Overview" },
+            { id: "ai-yield", icon: Cpu, label: "AI Yield Engine" },
+            { id: "vault", icon: Wallet, label: "Cold Vault" }
+          ].map((t) => (
             <button
-              type="submit"
-              disabled={submitting}
-              className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-semibold hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
+              key={t.id}
+              onClick={() => setActiveTab(t.id as any)}
+              className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${
+                activeTab === t.id 
+                  ? "bg-primary text-primary-foreground shadow-md" 
+                  : "bg-card border border-border text-muted-foreground hover:bg-secondary hover:text-foreground"
+              }`}
             >
-              {submitting && <Loader2 size={16} className="animate-spin" />}
-              {submitting ? "Submitting..." : "Send Enquiry"}
+              <t.icon size={16} /> {t.label}
             </button>
-          </form>
+          ))}
         </div>
-      </section>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.3 }}
+          >
+            {activeTab === "overview" && (
+              <div className="space-y-6">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-card border border-border p-6 rounded-3xl shadow-sm relative overflow-hidden group hover:border-primary/50 transition-colors">
+                    <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all">
+                      <Wallet size={100} />
+                    </div>
+                    <p className="text-sm font-semibold text-muted-foreground mb-2">Total Balance (USD)</p>
+                    <h2 className="text-4xl font-mono font-bold text-foreground tracking-tight">$0.00</h2>
+                    <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-muted-foreground bg-secondary w-fit px-3 py-1.5 rounded-lg">
+                      <Clock size={14} /> Pending deposit confirmation
+                    </div>
+                  </div>
+
+                  <div className="bg-card border border-border p-6 rounded-3xl shadow-sm relative overflow-hidden group hover:border-green-500/50 transition-colors">
+                    <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all text-green-500">
+                      <TrendingUp size={100} />
+                    </div>
+                    <p className="text-sm font-semibold text-muted-foreground mb-2">Current AI APY</p>
+                    <h2 className="text-4xl font-mono font-bold text-green-500 tracking-tight flex items-baseline gap-2">
+                      {totalYield.toFixed(2)}% <span className="text-sm font-sans text-green-500/70"><ArrowUpRight size={16}/></span>
+                    </h2>
+                    <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-muted-foreground bg-secondary w-fit px-3 py-1.5 rounded-lg">
+                      <Activity size={14} className="text-green-500" /> Optimized 2 mins ago
+                    </div>
+                  </div>
+
+                  <div className="bg-card border border-border p-6 rounded-3xl shadow-sm relative overflow-hidden group hover:border-blue-500/50 transition-colors">
+                    <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all text-blue-500">
+                      <Award size={100} />
+                    </div>
+                    <p className="text-sm font-semibold text-muted-foreground mb-2">Account Tier</p>
+                    <h2 className="text-4xl font-bold text-foreground tracking-tight">Standard</h2>
+                    <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-muted-foreground bg-secondary w-fit px-3 py-1.5 rounded-lg">
+                      <TrendingUp size={14} /> Deposit $10k+ for Premium
+                    </div>
+                  </div>
+                </div>
+
+                {/* Next Steps / Onboarding */}
+                <div className="bg-card border border-border p-8 rounded-3xl shadow-sm">
+                  <h3 className="text-xl font-bold text-foreground mb-6">Action Required to Start Earning</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-4 p-4 rounded-2xl bg-secondary border border-border opacity-60">
+                      <CheckCircle2 size={24} className="text-green-500 shrink-0" />
+                      <div>
+                        <h4 className="font-semibold text-foreground line-through">Create Account</h4>
+                        <p className="text-sm text-muted-foreground">Successfully registered with Asset Circle.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4 p-4 rounded-2xl bg-primary/5 border border-primary/20 relative overflow-hidden">
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+                      <div className="w-6 h-6 rounded-full border-2 border-primary text-primary flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">2</div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-foreground">Fund Your Account</h4>
+                        <p className="text-sm text-muted-foreground mb-4">You have $0.00 allocated to the AI Yield Engine. To begin generating returns, deposit funds via wire transfer or crypto.</p>
+                        <button className="px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:brightness-110 transition-all shadow-sm">
+                          Initiate Deposit
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4 p-4 rounded-2xl bg-background border border-border opacity-50">
+                      <div className="w-6 h-6 rounded-full border-2 border-muted-foreground text-muted-foreground flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">3</div>
+                      <div>
+                        <h4 className="font-semibold text-foreground">Yield Activation</h4>
+                        <p className="text-sm text-muted-foreground">Your funds will automatically enter the next arbitrage cycle upon deposit confirmation.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "ai-yield" && (
+              <div className="space-y-6">
+                <div className="bg-card border border-border p-8 rounded-3xl shadow-sm text-center py-16">
+                  <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                    <Cpu size={40} className="text-primary animate-pulse" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-foreground mb-4">Yield Engine is Standing By</h2>
+                  <p className="text-muted-foreground max-w-md mx-auto mb-8">
+                    Our neural network is currently tracking 14,204 liquidity pools globally. Deposit capital to activate your personal node and start capturing risk-free arbitrage.
+                  </p>
+                  
+                  <div className="max-w-3xl mx-auto bg-background border border-border rounded-2xl p-6 text-left">
+                    <h3 className="font-semibold text-foreground mb-4 border-b border-border pb-2 flex items-center gap-2">
+                      <Activity size={16} className="text-primary"/> Live Network Feed
+                    </h3>
+                    <div className="space-y-3 font-mono text-xs">
+                      {[
+                        { pair: "USDC/USDT", venue: "Curve", apy: "12.4%" },
+                        { pair: "WBTC/BTC", venue: "Aave V3", apy: "8.1%" },
+                        { pair: "WETH/stETH", venue: "Lido", apy: "5.6%" },
+                      ].map((log, i) => (
+                        <div key={i} className="flex justify-between p-2 rounded bg-secondary text-muted-foreground">
+                          <span>[SCAN] {log.pair} @ {log.venue}</span>
+                          <span className="text-green-500 font-bold">{log.apy} Available</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "vault" && (
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-card border border-border p-8 rounded-3xl shadow-sm h-full flex flex-col justify-center">
+                  <div className="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-6">
+                    <ShieldCheck size={32} className="text-blue-500" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-foreground mb-4">Zero-Knowledge Cold Vault</h2>
+                  <p className="text-muted-foreground leading-relaxed mb-6">
+                    When you deposit, 99% of your capital is instantly routed to our Swiss-based, air-gapped cold storage facilities. Withdrawals require multi-signature approval and take up to 24 hours for security clearance.
+                  </p>
+                  <div className="bg-secondary p-4 rounded-xl border border-border text-sm font-semibold flex justify-between">
+                    <span className="text-muted-foreground">Vault Status:</span>
+                    <span className="text-green-500 flex items-center gap-1"><CheckCircle2 size={16}/> Secured & Active</span>
+                  </div>
+                </div>
+                
+                <div className="bg-card border border-border p-8 rounded-3xl shadow-sm h-full">
+                  <h3 className="text-lg font-bold text-foreground mb-6">Approved Whitelist Addresses</h3>
+                  <div className="flex flex-col items-center justify-center text-center h-48 border-2 border-dashed border-border rounded-2xl">
+                    <Wallet size={32} className="text-muted-foreground/50 mb-3" />
+                    <p className="text-sm font-semibold text-muted-foreground mb-1">No Addresses Whitelisted</p>
+                    <p className="text-xs text-muted-foreground px-4 mb-4">You must whitelist a withdrawal address to move funds out of the vault.</p>
+                    <button className="text-sm text-primary font-semibold hover:underline">Add Address</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

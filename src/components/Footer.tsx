@@ -1,7 +1,11 @@
 import { Link } from "react-router-dom";
-import { Shield, Mail } from "lucide-react";
+import { Shield, ArrowRight } from "lucide-react";
 
-const Footer = () => {
+interface FooterProps {
+  onOpenAuth?: (tab?: "login" | "signup") => void;
+}
+
+const Footer = ({ onOpenAuth }: FooterProps) => {
   return (
     <footer className="bg-secondary text-muted-foreground py-16 border-t border-border">
       <div className="container mx-auto px-6">
@@ -14,12 +18,35 @@ const Footer = () => {
                 Asset<span className="text-primary">Circle</span>
               </span>
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed mb-6">
               Institutional-grade digital asset custody, yield optimization, and blockchain investment systems.
             </p>
+            {onOpenAuth && (
+              <button
+                onClick={() => onOpenAuth("signup")}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-semibold text-sm hover:bg-primary/20 transition-colors"
+              >
+                Create Free Account <ArrowRight size={14} />
+              </button>
+            )}
           </div>
 
           {/* Quick Links */}
+          <div>
+            <h4 className="text-sm font-semibold uppercase tracking-wider mb-4 text-foreground">Platform</h4>
+            <div className="flex flex-col gap-2">
+              <button onClick={() => window.scrollTo(0, 0)} className="text-sm text-left text-muted-foreground hover:text-primary transition-colors">
+                Home
+              </button>
+              {onOpenAuth && (
+                <button onClick={() => onOpenAuth("login")} className="text-sm text-left text-muted-foreground hover:text-primary transition-colors">
+                  Client Login
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Legal */}
           <div>
             <h4 className="text-sm font-semibold uppercase tracking-wider mb-4 text-foreground">Legal Documents</h4>
             <div className="flex flex-col gap-2">
@@ -30,20 +57,9 @@ const Footer = () => {
                 Terms & Conditions
               </Link>
             </div>
-          </div>
-
-          {/* Support */}
-          <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider mb-4 text-foreground">Contact</h4>
-            <div className="flex flex-col gap-3 text-sm text-muted-foreground">
-              <a href="mailto:support@assetcircle.com" className="flex items-center gap-2 hover:text-primary transition-colors">
-                <Mail size={16} className="text-primary" />
-                <span>support@assetcircle.com</span>
-              </a>
-              <p className="text-xs text-muted-foreground/70">
-                Authorised digital asset custody service. Zero-Knowledge protocols active.
-              </p>
-            </div>
+            <p className="text-xs text-muted-foreground/70 mt-6">
+              Authorised digital asset custody service. Zero-Knowledge protocols active.
+            </p>
           </div>
         </div>
 

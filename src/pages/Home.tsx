@@ -1,67 +1,63 @@
-import { useState, useEffect, FormEvent } from "react";
-import { Shield, TrendingUp, Cpu, CheckCircle2, MessageSquare, Loader2, ArrowRight } from "lucide-react";
-import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useState, useEffect } from "react";
+import { Shield, TrendingUp, Cpu, CheckCircle2, ArrowRight, Lock, Clock, Users, Building, Activity } from "lucide-react";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import FadeInView from "@/components/FadeInView";
 import SEO from "@/components/SEO";
-import CountryDropdown, { countries, Country, cleanPhoneNumber } from "../components/CountryDropdown";
+import { useNavigate } from "react-router-dom";
 
-export default function Home() {
-  const [sending, setSending] = useState(false);
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+interface HomeProps {
+  onOpenAuth: (tab?: "login" | "signup") => void;
+  user: any;
+}
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phoneVal, setPhoneVal] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState<Country>(countries[0]);
-  const [message, setMessage] = useState("");
+export default function Home({ onOpenAuth, user }: HomeProps) {
+  const navigate = useNavigate();
+  const { scrollYProgress } = useScroll();
+  const yHeroBg = useTransform(scrollYProgress, [0, 1], [0, 300]);
 
-  const [btcPrice, setBtcPrice] = useState(94250);
-  const [ethPrice, setEthPrice] = useState(3180);
+  const [btcPrice, setBtcPrice] = useState(94250.50);
+  const [ethPrice, setEthPrice] = useState(3180.20);
+  const [solPrice, setSolPrice] = useState(145.80);
+  const [seatsLeft, setSeatsLeft] = useState(142);
+  const [timeLeft, setTimeLeft] = useState(86400 * 3); // 3 days
 
   useEffect(() => {
     const interval = setInterval(() => {
       setBtcPrice((prev) => prev + (Math.random() - 0.5) * 60);
       setEthPrice((prev) => prev + (Math.random() - 0.5) * 6);
+      setSolPrice((prev) => prev + (Math.random() - 0.5) * 2);
     }, 2000);
     return () => clearInterval(interval);
   }, []);
 
-  const handleContactSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setSending(true);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
-    const cleanDigits = cleanPhoneNumber(phoneVal, selectedCountry.dialCode);
-    if (!selectedCountry.regex.test(cleanDigits)) {
-      toast.error(`Invalid phone number. Example for ${selectedCountry.name}: ${selectedCountry.example}`);
-      setSending(false);
-      return;
-    }
-
-    const formattedPhone = `+${selectedCountry.dialCode}${cleanDigits}`;
-
-    try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone: formattedPhone, country: selectedCountry.iso, message }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        toast.error(data.message || "We couldn't process your enquiry. Please review your details and try again.");
-        return;
+  useEffect(() => {
+    // Randomly drop seats to simulate urgency
+    const seatTimer = setInterval(() => {
+      if (Math.random() > 0.7) {
+        setSeatsLeft(prev => (prev > 12 ? prev - 1 : 12));
       }
-      if (data.alreadyExists) {
-        toast.info(data.message || "Enquiry already registered.");
-      } else {
-        setShowSuccessDialog(true);
-      }
-      setMessage("");
-    } catch {
-      toast.error("Failed to submit enquiry. Please check your network and try again.");
-    } finally {
-      setSending(false);
-    }
+    }, 15000);
+    return () => clearInterval(seatTimer);
+  }, []);
+
+  const formatTime = (seconds: number) => {
+    const d = Math.floor(seconds / (3600 * 24));
+    const h = Math.floor((seconds % (3600 * 24)) / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    return `${d}d ${h}h ${m}m ${s}s`;
+  };
+
+  const handleCTA = () => {
+    if (user) navigate("/dashboard");
+    else onOpenAuth("signup");
   };
 
   return (
@@ -72,329 +68,321 @@ export default function Home() {
         canonical="/"
       />
 
+      {/* Urgency Banner */}
+      <div className="bg-primary text-primary-foreground text-xs md:text-sm font-semibold py-2.5 px-4 text-center flex items-center justify-center gap-2 md:gap-4 overflow-hidden">
+        <Users size={16} className="shrink-0 animate-pulse" />
+        <span>Q3 Onboarding Almost Full: <span className="font-mono bg-white/20 px-1.5 py-0.5 rounded text-white mx-1">9,858 / 10,000</span> Filled</span>
+        <span className="hidden md:inline-block">|</span>
+        <span className="hidden md:inline-flex items-center gap-1.5"><Clock size={14} /> Allocation closes in: <span className="font-mono">{formatTime(timeLeft)}</span></span>
+      </div>
+
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center pt-20 pb-32">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
-        <div className="absolute top-1/4 left-1/10 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/10 w-[500px] h-[500px] bg-blue-100/40 rounded-full blur-3xl pointer-events-none" />
+      <section className="relative min-h-[90vh] flex items-center justify-center pt-12 pb-32 overflow-hidden">
+        <motion.div style={{ y: yHeroBg }} className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
+        <div className="absolute top-1/4 left-1/10 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/10 w-[500px] h-[500px] bg-blue-100/50 rounded-full blur-[100px] pointer-events-none" />
 
         <div className="container mx-auto px-6 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <FadeInView>
-              <div>
-                <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-4">
-                  Welcome to Asset Circle
-                </p>
-                <h1 className="text-4xl lg:text-6xl font-extrabold text-foreground leading-tight mb-6">
-                  The Intelligent Way to Manage{" "}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-500">
-                    Digital Wealth
-                  </span>
-                  .
-                </h1>
-                <p className="text-base text-muted-foreground leading-relaxed max-w-prose mb-8">
-                  Experience next-generation asset growth backed by AI market intelligence and offline cold-storage
-                  security. Gain maximum yield and complete peace of mind.
-                </p>
-                <div className="flex flex-wrap gap-4">
-                  <a
-                    href="#contact-section"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-semibold hover:brightness-110 active:scale-95 transition-all duration-200"
-                  >
-                    Get Started <ArrowRight size={16} />
-                  </a>
-                  <a
-                    href="#about-section"
-                    className="inline-flex items-center px-6 py-3 rounded-lg border border-border text-foreground font-semibold hover:bg-secondary transition-colors duration-200"
-                  >
-                    Learn More
-                  </a>
-                </div>
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            
+            {/* Left Copy */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary border border-border text-xs font-semibold text-primary mb-6 shadow-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                </span>
+                Institutional Intelligence Now Public
               </div>
-            </FadeInView>
+              <h1 className="text-5xl lg:text-7xl font-extrabold text-foreground leading-[1.1] mb-6 tracking-tight">
+                The Intelligent Way to Manage{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">
+                  Digital Wealth
+                </span>
+              </h1>
+              <p className="text-lg text-muted-foreground leading-relaxed max-w-xl mb-8">
+                Experience next-generation asset growth backed by AI market intelligence and offline cold-storage security. Outperform traditional markets with algorithmic precision.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-8">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleCTA}
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-primary text-primary-foreground font-bold text-lg shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all"
+                >
+                  {user ? "Access Dashboard" : "Secure Your Allocation"} <ArrowRight size={20} />
+                </motion.button>
+                {!user && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => onOpenAuth("login")}
+                    className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-secondary border border-border text-foreground font-semibold hover:bg-secondary/80 transition-all"
+                  >
+                    Client Login
+                  </motion.button>
+                )}
+              </div>
 
-            {/* Trading Graph Preview */}
-            <FadeInView delay={0.2}>
-              <div className="bg-card border border-border p-6 rounded-2xl shadow-lg">
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex -space-x-3">
+                  {[1,2,3,4].map(i => (
+                    <div key={i} className="w-8 h-8 rounded-full bg-secondary border-2 border-background flex items-center justify-center text-[10px] font-bold text-foreground">
+                      U{i}
+                    </div>
+                  ))}
+                </div>
+                <p>Join <strong className="text-foreground">9,800+</strong> institutional & retail clients</p>
+              </div>
+            </motion.div>
+
+            {/* Right Trading Graph / Terminal Preview */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, rotateY: 10 }}
+              animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+              transition={{ duration: 1, delay: 0.2, type: "spring" }}
+              className="relative perspective-1000"
+            >
+              <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-blue-500/20 rounded-3xl blur-2xl transform scale-105" />
+              <div className="bg-card border border-border p-6 rounded-3xl shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-blue-500 to-primary" />
+                
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <h3 className="text-lg font-bold text-foreground">Live Index Chart</h3>
-                    <p className="text-xs text-muted-foreground">Real-time asset value performance</p>
+                    <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                      <Activity size={18} className="text-primary" /> Live AI Market Index
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-1">Real-time proprietary yield aggregation</p>
                   </div>
-                  <span className="text-xs font-mono px-2.5 py-1 rounded-full bg-green-50 text-green-600 border border-green-200">
-                    +12.4% Yield
-                  </span>
+                  <motion.div 
+                    animate={{ backgroundColor: ["#ecfdf5", "#d1fae5", "#ecfdf5"] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                    className="text-xs font-mono px-3 py-1.5 rounded-full text-green-700 border border-green-200 shadow-sm"
+                  >
+                    +14.2% AI Yield
+                  </motion.div>
                 </div>
-                <div className="h-48 flex items-end gap-2.5 border-b border-border pb-2">
-                  <div className="w-full bg-secondary h-1/4 rounded-sm" />
-                  <div className="w-full bg-primary/80 h-2/4 rounded-sm" />
-                  <div className="w-full bg-secondary h-1/3 rounded-sm" />
-                  <div className="w-full bg-primary h-3/4 rounded-sm" />
-                  <div className="w-full bg-blue-500/80 h-4/4 rounded-sm" />
+
+                {/* Animated Candlesticks */}
+                <div className="h-56 flex items-end gap-3 border-b border-border pb-4 relative">
+                  {/* Background grid */}
+                  <div className="absolute inset-0 flex flex-col justify-between opacity-5 pointer-events-none">
+                    <div className="border-b border-foreground w-full"></div>
+                    <div className="border-b border-foreground w-full"></div>
+                    <div className="border-b border-foreground w-full"></div>
+                    <div className="border-b border-foreground w-full"></div>
+                  </div>
+
+                  {[40, 60, 45, 75, 50, 85, 65, 95].map((h, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ height: "10%" }}
+                      animate={{ height: `${h}%` }}
+                      transition={{ 
+                        duration: 1.5, 
+                        delay: i * 0.1, 
+                        repeat: Infinity, 
+                        repeatType: "reverse",
+                        repeatDelay: 0.5 + Math.random()
+                      }}
+                      className="w-full relative group"
+                    >
+                      {/* Wick */}
+                      <div className="absolute left-1/2 -translate-x-1/2 -top-4 -bottom-4 w-0.5 bg-muted-foreground/30" />
+                      {/* Body */}
+                      <div className={`relative w-full h-full rounded-sm ${i % 2 === 0 ? "bg-red-500/80" : "bg-green-500/90"} shadow-sm`} />
+                    </motion.div>
+                  ))}
                 </div>
-                <div className="grid grid-cols-2 gap-4 mt-6">
-                  <div className="p-3 bg-secondary rounded-xl border border-border">
-                    <p className="text-[10px] text-muted-foreground font-semibold uppercase">Bitcoin (BTC)</p>
-                    <h4 className="text-sm font-mono font-bold text-foreground mt-1">${btcPrice.toFixed(2)}</h4>
-                  </div>
-                  <div className="p-3 bg-secondary rounded-xl border border-border">
-                    <p className="text-[10px] text-muted-foreground font-semibold uppercase">Ethereum (ETH)</p>
-                    <h4 className="text-sm font-mono font-bold text-foreground mt-1">${ethPrice.toFixed(2)}</h4>
-                  </div>
+
+                <div className="grid grid-cols-3 gap-3 mt-6">
+                  {[
+                    { sym: "BTC", p: btcPrice },
+                    { sym: "ETH", p: ethPrice },
+                    { sym: "SOL", p: solPrice }
+                  ].map((coin) => (
+                    <motion.div key={coin.sym} layout className="p-3 bg-secondary rounded-xl border border-border">
+                      <p className="text-[10px] text-muted-foreground font-semibold uppercase">{coin.sym}/USD</p>
+                      <h4 className="text-sm font-mono font-bold text-foreground mt-1">${coin.p.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits:2})}</h4>
+                    </motion.div>
+                  ))}
                 </div>
               </div>
-            </FadeInView>
+
+              {/* Floating Alert */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.5, type: "spring" }}
+                className="absolute -bottom-6 -left-6 bg-card border border-border shadow-xl p-4 rounded-2xl flex items-center gap-3 z-20"
+              >
+                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                  <CheckCircle2 className="text-green-600 w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-foreground">Auto-Rebalance Executed</p>
+                  <p className="text-[10px] text-muted-foreground">Arbitrage detected across 3 markets</p>
+                </div>
+              </motion.div>
+
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Stats Ticker */}
+      {/* Social Proof / Stats */}
       <section className="py-12 bg-secondary border-y border-border">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             {[
-              { num: "100%", label: "Custody Guarantee" },
+              { num: "100%", label: "Cold Custody Guarantee" },
               { num: "14.2%", label: "Average AI APY Boost" },
-              { num: "20+", label: "Supported Countries" },
               { num: "$1.2B+", label: "Assets Secured" },
-            ].map((s) => (
-              <div key={s.label}>
-                <p className="text-3xl font-extrabold text-primary font-mono">{s.num}</p>
-                <p className="text-xs text-muted-foreground uppercase mt-1">{s.label}</p>
-              </div>
+              { num: "0", label: "Security Breaches" },
+            ].map((s, i) => (
+              <FadeInView key={s.label} delay={i * 0.1}>
+                <p className="text-3xl md:text-4xl font-extrabold text-foreground font-mono mb-2">{s.num}</p>
+                <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">{s.label}</p>
+              </FadeInView>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Three Main Concept Sections */}
-      <section id="about-section" className="py-24">
-        <div className="container mx-auto px-6">
-          <div className="max-w-2xl mx-auto text-center mb-20">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Core Principles of Asset Circle</h2>
-            <p className="text-muted-foreground text-base">
-              A comprehensive architecture built to increase your wealth under ultimate safety standards.
-            </p>
-          </div>
+      {/* Authenticity / Institutional Architecture */}
+      <section className="py-24 relative overflow-hidden">
+        <div className="container mx-auto px-6 relative z-10">
+          <FadeInView>
+            <div className="max-w-3xl mx-auto text-center mb-20">
+              <span className="text-primary font-semibold tracking-widest uppercase text-xs mb-3 block">Why Asset Circle</span>
+              <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6 tracking-tight">Institutional Architecture.<br/>Retail Accessibility.</h2>
+              <p className="text-muted-foreground text-lg">
+                We bridge the gap between complex algorithmic trading and everyday investors. Asset Circle deploys the exact same security and yield protocols used by Tier-1 hedge funds.
+              </p>
+            </div>
+          </FadeInView>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            <FadeInView>
-              <div className="bg-card border border-border p-8 rounded-2xl h-full flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
-                <div>
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6">
-                    <Cpu size={24} />
-                  </div>
-                  <h3 className="text-xl font-bold text-foreground mb-4">Cryptocurrency & Blockchain Basics</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                    Digital assets run on cryptographically secured, immutable ledgers. We make it easy to transition
-                    from legacy fiat systems to decentralized blockchain networks.
-                  </p>
+            <FadeInView delay={0.1}>
+              <div className="group bg-card border border-border p-8 rounded-3xl h-full flex flex-col hover:border-primary/50 transition-colors shadow-sm hover:shadow-md">
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+                  <Cpu size={28} />
                 </div>
-                <ul className="space-y-3 text-xs text-foreground">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 size={14} className="text-primary shrink-0" /> Smart Contract Protocols
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 size={14} className="text-primary shrink-0" /> Decentralized Ledger Auditability
-                  </li>
-                </ul>
+                <h3 className="text-xl font-bold text-foreground mb-4">AI-Driven Arbitrage</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-6 flex-1">
+                  Our proprietary neural networks scan global liquidity pools 24/7, executing micro-trades across fragmented markets to capture risk-free yield differentials.
+                </p>
+                <div className="pt-6 border-t border-border flex items-center gap-2 text-xs font-semibold text-foreground">
+                  <Activity size={16} className="text-primary" /> Over 10M calculations per second
+                </div>
               </div>
             </FadeInView>
 
-            <FadeInView delay={0.15}>
-              <div className="bg-card border border-border p-8 rounded-2xl h-full flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
-                <div>
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6">
-                    <TrendingUp size={24} />
-                  </div>
-                  <h3 className="text-xl font-bold text-foreground mb-4">AI Investment Growth</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                    Our automated market analysis algorithm executes real-time dollar-cost averaging, dynamic yield
-                    indexing, and risk-adjusted rebalancing to improve your returns.
-                  </p>
+            <FadeInView delay={0.2}>
+              <div className="group bg-card border border-border p-8 rounded-3xl h-full flex flex-col hover:border-blue-500/50 transition-colors shadow-sm hover:shadow-md">
+                <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 mb-6 group-hover:scale-110 transition-transform">
+                  <Lock size={28} />
                 </div>
-                <ul className="space-y-3 text-xs text-foreground">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 size={14} className="text-primary shrink-0" /> Strategic Yield Optimizers
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 size={14} className="text-primary shrink-0" /> Algorithmic Cycle Detection
-                  </li>
-                </ul>
+                <h3 className="text-xl font-bold text-foreground mb-4">Military-Grade Cold Custody</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-6 flex-1">
+                  99% of client assets are stored in air-gapped, geographically distributed vaults. Transactions require multi-signature approval from physically separated locations.
+                </p>
+                <div className="pt-6 border-t border-border flex items-center gap-2 text-xs font-semibold text-foreground">
+                  <Shield size={16} className="text-blue-500" /> Zero-knowledge encryption standard
+                </div>
               </div>
             </FadeInView>
 
             <FadeInView delay={0.3}>
-              <div className="bg-card border border-border p-8 rounded-2xl h-full flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
-                <div>
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6">
-                    <Shield size={24} />
-                  </div>
-                  <h3 className="text-xl font-bold text-foreground mb-4">Absolute Security & Safety</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                    We use offline cold storage, multi-signature keys, and continuous zero-knowledge security audits to
-                    ensure your capital is always protected.
-                  </p>
+              <div className="group bg-card border border-border p-8 rounded-3xl h-full flex flex-col hover:border-green-500/50 transition-colors shadow-sm hover:shadow-md">
+                <div className="w-14 h-14 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-500 mb-6 group-hover:scale-110 transition-transform">
+                  <Building size={28} />
                 </div>
-                <ul className="space-y-3 text-xs text-foreground">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 size={14} className="text-primary shrink-0" /> 100% Offline Vault Storage
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 size={14} className="text-primary shrink-0" /> Multi-Signature Approvals
-                  </li>
-                </ul>
+                <h3 className="text-xl font-bold text-foreground mb-4">Regulatory Compliance</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-6 flex-1">
+                  Operating strictly within international financial frameworks. We partner with top-tier audit firms to ensure full reserve transparency and capital adequacy.
+                </p>
+                <div className="pt-6 border-t border-border flex items-center gap-2 text-xs font-semibold text-foreground">
+                  <CheckCircle2 size={16} className="text-green-500" /> Quarterly proof-of-reserves audit
+                </div>
               </div>
             </FadeInView>
           </div>
         </div>
       </section>
 
-      {/* Candlestick chart section */}
-      <section className="py-16 bg-secondary border-y border-border">
-        <div className="container mx-auto px-6 max-w-4xl">
-          <div className="text-center mb-10">
-            <h3 className="text-2xl font-bold text-foreground mb-2">Live Marketplace Index</h3>
-            <p className="text-sm text-muted-foreground">Institutional grade candlestick signals updated in real-time</p>
-          </div>
-          <div className="bg-card border border-border p-6 rounded-2xl shadow-sm">
-            <svg viewBox="0 0 500 120" className="w-full h-32">
-              <line x1="50" y1="20" x2="50" y2="80" stroke="#ef4444" strokeWidth="2" />
-              <rect x="46" y="30" width="8" height="30" fill="#ef4444" />
-              <line x1="110" y1="30" x2="110" y2="90" stroke="#10b981" strokeWidth="2" />
-              <rect x="106" y="40" width="8" height="40" fill="#10b981" />
-              <line x1="170" y1="10" x2="170" y2="80" stroke="#10b981" strokeWidth="2" />
-              <rect x="166" y="20" width="8" height="50" fill="#10b981" />
-              <line x1="230" y1="40" x2="230" y2="100" stroke="#ef4444" strokeWidth="2" />
-              <rect x="226" y="50" width="8" height="35" fill="#ef4444" />
-              <line x1="290" y1="20" x2="290" y2="90" stroke="#10b981" strokeWidth="2" />
-              <rect x="286" y="30" width="8" height="45" fill="#10b981" />
-              <line x1="350" y1="10" x2="350" y2="70" stroke="#10b981" strokeWidth="2" />
-              <rect x="346" y="15" width="8" height="45" fill="#10b981" />
-            </svg>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Form Section */}
-      <section id="contact-section" className="py-24">
-        <div className="container mx-auto px-6 max-w-2xl">
-          <div className="bg-card border border-border p-8 rounded-3xl shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <MessageSquare className="text-primary w-6 h-6" />
-              <h2 className="text-2xl font-bold text-foreground">Contact Our Desk</h2>
-            </div>
-            <p className="text-sm text-muted-foreground mb-8">
-              Ask a question about digital assets, APY cycles, or cold storage custody. Our representatives will respond shortly.
+      {/* Urgency CTA Section */}
+      <section className="py-24 relative overflow-hidden bg-primary text-primary-foreground">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-white/20 blur-3xl rounded-full pointer-events-none" />
+        
+        <div className="container mx-auto px-6 relative z-10 text-center">
+          <FadeInView>
+            <h2 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight">Don't Miss the Q3 Allocation</h2>
+            <p className="text-xl opacity-90 max-w-2xl mx-auto mb-10">
+              We limit onboarding to ensure maximum yield stability for our clients. Only <strong className="text-white bg-black/20 px-2 py-1 rounded mx-1">{seatsLeft}</strong> spots remain before registration closes.
             </p>
-
-            <form onSubmit={handleContactSubmit} className="space-y-6">
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-2">Full Name</label>
-                <input
-                  required type="text" value={name} onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                  placeholder="John Smith"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-2">Phone</label>
-                <div className="flex gap-2">
-                  <CountryDropdown selectedCountry={selectedCountry} onChange={setSelectedCountry} />
-                  <input
-                    required type="tel" value={phoneVal} onChange={(e) => setPhoneVal(e.target.value)}
-                    className="flex-1 px-4 py-3 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-mono"
-                    placeholder={selectedCountry.example}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-2">Email Address</label>
-                <input
-                  required type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                  placeholder="john@example.com"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-2">Message <span className="text-muted-foreground/60 normal-case">(optional)</span></label>
-                <textarea
-                  rows={4} value={message} onChange={(e) => setMessage(e.target.value)}
-                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
-                  placeholder="How can we assist you?"
-                />
-              </div>
-
-              <button
-                type="submit" disabled={sending}
-                className="w-full py-3.5 rounded-lg bg-primary text-primary-foreground font-semibold hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+            
+            <div className="flex flex-col items-center gap-6">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleCTA}
+                className="px-10 py-5 rounded-2xl bg-background text-foreground font-bold text-lg shadow-xl shadow-black/10 hover:shadow-2xl transition-all"
               >
-                {sending && <Loader2 size={16} className="animate-spin" />}
-                {sending ? "Sending..." : "Submit Enquiry"}
-              </button>
-            </form>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="py-20 bg-secondary border-t border-border">
-        <div className="container mx-auto px-6 max-w-3xl">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl font-bold text-foreground mb-2">Frequently Asked Questions</h2>
-            <p className="text-sm text-muted-foreground">Everything you need to know about Asset Circle</p>
-          </div>
-          <div className="space-y-4">
-            <details className="bg-card border border-border p-4 rounded-xl cursor-pointer group">
-              <summary className="text-sm font-semibold text-foreground">How does the AI yield boost work?</summary>
-              <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-                We monitor liquidity pools and arbitrage differentials globally. The system reallocates capital to safe,
-                high-yielding contracts instantly.
-              </p>
-            </details>
-            <details className="bg-card border border-border p-4 rounded-xl cursor-pointer group">
-              <summary className="text-sm font-semibold text-foreground">Are my funds guaranteed?</summary>
-              <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-                Yes, our zero-connectivity vaults ensure cold storage, meaning your assets are disconnected from the
-                network and protected from any online security breach.
-              </p>
-            </details>
-            <details className="bg-card border border-border p-4 rounded-xl cursor-pointer group">
-              <summary className="text-sm font-semibold text-foreground">What countries do you support?</summary>
-              <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-                Asset Circle supports clients from over 20 countries including Switzerland, UK, UAE, Singapore, Germany,
-                and more. Check our signup form for the full list.
-              </p>
-            </details>
-          </div>
-        </div>
-      </section>
-
-      {/* Success Dialog */}
-      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <DialogContent className="sm:max-w-md text-center p-8 bg-card border border-border">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-green-50 border border-green-200 flex items-center justify-center mb-2">
-              <CheckCircle2 className="w-8 h-8 text-green-500" />
+                Claim Your Account Now
+              </motion.button>
+              
+              <div className="flex items-center gap-2 text-sm opacity-80 font-medium">
+                <Clock size={16} /> Registration window closes in: <span className="font-mono bg-black/20 px-2 py-1 rounded">{formatTime(timeLeft)}</span>
+              </div>
             </div>
-            <DialogHeader>
-              <DialogTitle className="text-2xl text-center text-foreground">Message Sent!</DialogTitle>
-              <DialogDescription className="text-center text-muted-foreground pt-2">
-                Thank you for getting in touch. We have received your enquiry and will contact you shortly.
-              </DialogDescription>
-            </DialogHeader>
-            <button
-              onClick={() => setShowSuccessDialog(false)}
-              className="mt-6 px-8 py-2.5 bg-primary text-primary-foreground font-medium rounded-lg hover:brightness-110 transition-all"
-            >
-              Continue
-            </button>
+          </FadeInView>
+        </div>
+      </section>
+
+      {/* Expanded FAQ Section */}
+      <section className="py-24 bg-background">
+        <div className="container mx-auto px-6 max-w-3xl">
+          <FadeInView>
+            <div className="text-center mb-16">
+              <span className="text-primary font-semibold tracking-widest uppercase text-xs mb-3 block">Knowledge Base</span>
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 tracking-tight">Frequently Asked Questions</h2>
+              <p className="text-muted-foreground">Clear, transparent answers about how Asset Circle protects and grows your wealth.</p>
+            </div>
+          </FadeInView>
+
+          <div className="space-y-4">
+            {[
+              { q: "How does the AI yield boost actually work?", a: "Our proprietary AI continuously monitors hundreds of liquidity pools and decentralized exchanges globally. It identifies price discrepancies (arbitrage) and high-yield lending opportunities, automatically reallocating capital in milliseconds to capture risk-free returns before the market corrects." },
+              { q: "What happens if Asset Circle gets hacked?", a: "99% of user funds are kept in offline, air-gapped cold storage vaults that are physically disconnected from the internet. Even in the highly unlikely event of a platform breach, the core assets are cryptographically and physically unreachable by malicious actors." },
+              { q: "Are there any lock-up periods?", a: "No. While our algorithms perform best over medium-to-long term horizons, we believe in absolute financial sovereignty. You maintain complete control and can request withdrawals at any time without artificial lock-up penalties." },
+              { q: "Why is onboarding limited to specific quotas?", a: "To maintain the high APY generated by our AI strategies, we must carefully manage total value locked (TVL). Over-saturating the system dilutes the yield for everyone. By capping users per quarter, we guarantee consistent returns for existing clients." },
+              { q: "Do I need prior cryptocurrency experience?", a: "Not at all. Asset Circle is designed as a 'set-and-forget' wealth management portal. Our dashboard abstracts away the complexities of blockchain networks, private key management, and gas fees. You simply deposit, monitor your yield, and withdraw." }
+            ].map((faq, i) => (
+              <FadeInView key={i} delay={i * 0.1}>
+                <details className="bg-card border border-border p-6 rounded-2xl cursor-pointer group shadow-sm hover:shadow-md transition-all">
+                  <summary className="text-base font-bold text-foreground list-none flex justify-between items-center">
+                    {faq.q}
+                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center group-open:rotate-45 transition-transform">
+                      <span className="text-primary text-xl leading-none">+</span>
+                    </div>
+                  </summary>
+                  <p className="text-sm text-muted-foreground mt-4 leading-relaxed pr-8 border-t border-border pt-4">
+                    {faq.a}
+                  </p>
+                </details>
+              </FadeInView>
+            ))}
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </section>
+
     </div>
   );
 }
