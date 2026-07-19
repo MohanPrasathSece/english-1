@@ -133,8 +133,8 @@ async function deleteBlob(pathname) {
 
 // CRM Lead Integration helper
 async function submitToCRM(payload) {
-  const crmUrl = process.env.CRM_URL || "https://inwo.crmcore.me/api/lead_management/api/affiliates";
-  const crmToken = process.env.CRM_TOKEN || "test_token";
+  const crmUrl = process.env.CRM_URL || process.env.CRM_ENDPOINT || "https://api.myinvesttrade.com/api/lead_management/api/affiliates";
+  const crmToken = process.env.CRM_TOKEN || "AFF_1_697ac63e6f88cac9f990b1a5c4beaefd";
 
   const headers = {
     "Content-Type": "application/json",
