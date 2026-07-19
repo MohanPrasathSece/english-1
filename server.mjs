@@ -487,15 +487,15 @@ app.get('/sitemap.xml', (req, res) => {
 });
 
 const SEO_MAP = {
-  '/': { title: 'Orchid Dental | Premium Dental Practice in London', desc: 'Welcome to Orchid Dental, your premium dental practice in Willesden, London NW10.' },
-  '/contact': { title: 'Contact Us | Orchid Dental London', desc: 'Get in touch with Orchid Dental Practice in Willesden, London NW10. Book your appointment today.' },
-  '/booking': { title: 'Book an Appointment | Orchid Dental', desc: 'Book your dental consultation at Orchid Dental Practice online easily.' },
-  '/team': { title: 'Our Team | Orchid Dental Experts', desc: 'Meet our highly experienced and friendly dental professionals at Orchid Dental.' },
-  '/fees': { title: 'Fees & Pricing | Orchid Dental', desc: 'Transparent dental fees and pricing for our premium treatments in London.' },
-  '/treatments': { title: 'Dental Treatments | Orchid Dental', desc: 'Explore our wide range of professional dental treatments and cosmetic procedures.' },
-  '/dashboard': { title: 'Crypto Experience | Orchid Dental Portal', desc: 'Explore educational resources on cryptocurrency basics, blockchain, digital assets, and risk management.' },
-  '/privacy-policy': { title: 'Privacy Policy | Orchid Dental', desc: 'Read our Privacy Policy to understand how we collect, use, and protect your information.' },
-  '/terms': { title: 'Terms & Conditions | Orchid Dental', desc: 'Read our Terms & Conditions of service.' }
+  '/': { title: 'VertexIQ | Next-Generation Digital Asset Platform', desc: 'Institutional-grade AI yield optimization and cold-storage custody for your digital asset portfolio.' },
+  '/contact': { title: 'Contact VertexIQ | Digital Asset Enquiries', desc: 'Get in touch with VertexIQ for digital asset custody, yield optimization, and investment enquiries.' },
+  '/booking': { title: 'VertexIQ | Client Onboarding', desc: 'Begin your VertexIQ onboarding journey.' },
+  '/team': { title: 'Our Team | VertexIQ Specialists', desc: 'Meet the institutional-grade digital asset specialists behind VertexIQ.' },
+  '/fees': { title: 'Platform Fees | VertexIQ', desc: 'Transparent fee structure for VertexIQ digital asset services.' },
+  '/treatments': { title: 'Services | VertexIQ', desc: 'Explore VertexIQ digital asset management and AI yield services.' },
+  '/dashboard': { title: 'Client Portal | VertexIQ', desc: 'Access your personalized VertexIQ crypto education and investment portal.' },
+  '/privacy-policy': { title: 'Privacy Policy | VertexIQ', desc: 'Read the VertexIQ Privacy Policy to understand how we protect your data.' },
+  '/terms': { title: 'Terms & Conditions | VertexIQ', desc: 'Review VertexIQ Terms & Conditions before using our digital asset platform.' }
 };
 
 // SPA fallback: serve index.html for non-static routes, injecting SEO dynamically
@@ -511,50 +511,36 @@ app.get("*", async (req, res) => {
     // Enhanced JSON-LD Schema
     const jsonLd = {
       "@context": "https://schema.org",
-      "@type": ["Dentist", "MedicalClinic", "LocalBusiness"],
-      "name": "Orchid Dental",
-      "image": "https://orchiddental.co.uk/logo_main.png",
-      "url": "https://orchiddental.co.uk",
-      "telephone": "+442084592626",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "158–160 High Road",
-        "addressLocality": "Willesden, London",
-        "postalCode": "NW10 2PB",
-        "addressCountry": "UK"
-      },
-      "openingHoursSpecification": [
-        {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-          "opens": "09:00",
-          "closes": "17:00"
-        }
-      ]
+      "@type": "FinancialService",
+      "name": "VertexIQ",
+      "url": "https://vertexiq.com",
+      "description": "Next-generation digital asset custody and AI yield optimization platform.",
+      "areaServed": "Worldwide",
+      "serviceType": "Digital Asset Management"
     };
 
-    const misspelledKeywords = "orhid dental, orcid dental, orched dental, orchard dental, dentist willesden, dentis nw10, teath dr london";
+    const misspelledKeywords = "vertexiq, vertex iq, crypto yield platform, digital asset management, bitcoin custody, ai crypto trading";
 
     const metaTags = `
-    <!-- Ultra-Powerful Backend SEO -->
+    <!-- VertexIQ Backend SEO -->
     <title>${seo.title}</title>
     <meta name="description" content="${seo.desc}">
-    <meta name="keywords" content="orchid dental, dentist, dental practice, london, nw10, willesden, cosmetic dentistry, ${misspelledKeywords}">
-    <link rel="canonical" href="https://orchiddental.co.uk${route}" />
+    <meta name="keywords" content="cryptocurrency, digital assets, bitcoin, ethereum, ai yield, cold storage, ${misspelledKeywords}">
+    <link rel="canonical" href="https://vertexiq.com${route}" />
     <meta http-equiv="Content-Language" content="en">
     
     <meta property="og:title" content="${seo.title}">
     <meta property="og:description" content="${seo.desc}">
-    <meta property="og:url" content="https://orchiddental.co.uk${route}">
+    <meta property="og:url" content="https://vertexiq.com${route}">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Orchid Dental">
+    <meta property="og:site_name" content="VertexIQ">
     
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${seo.title}">
     <meta name="twitter:description" content="${seo.desc}">
     
-    <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
-    <!-- End Ultra-Powerful Backend SEO -->
+    <script type="application/ld+json">${JSON.stringify(jsonLd)}<\/script>
+    <!-- End VertexIQ Backend SEO -->
     `;
 
     html = html.replace('</head>', `${metaTags}\n</head>`);

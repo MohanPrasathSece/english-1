@@ -106,25 +106,25 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md bg-white/90 backdrop-blur-md border border-white/20 shadow-medical-lg p-6 rounded-2xl">
+      <DialogContent className="sm:max-w-md bg-slate-950 border border-slate-800 shadow-2xl p-6 rounded-2xl text-white">
         <DialogHeader className="mb-4">
-          <DialogTitle className="text-2xl font-bold text-center text-foreground font-rossetti">
-            Orchid <span className="text-primary">Dental</span> Portal
+          <DialogTitle className="text-2xl font-bold text-center text-white">
+            Vertex<span className="text-primary">IQ</span> Client Portal
           </DialogTitle>
-          <DialogDescription className="text-center text-muted-foreground">
-            Access your personalized client resources.
+          <DialogDescription className="text-center text-slate-400">
+            Access your personalized digital asset dashboard.
           </DialogDescription>
         </DialogHeader>
 
         {/* Tab switcher */}
-        <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-xl mb-6">
+        <div className="grid grid-cols-2 gap-2 bg-slate-900 p-1.5 rounded-xl mb-6 border border-slate-800">
           <button
             type="button"
             onClick={() => setTab("login")}
             className={`py-2 text-sm font-semibold rounded-lg transition-all ${
               tab === "login"
-                ? "bg-white text-primary shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-slate-800 text-primary shadow-sm"
+                : "text-slate-400 hover:text-white"
             }`}
           >
             Login
@@ -134,8 +134,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             onClick={() => setTab("signup")}
             className={`py-2 text-sm font-semibold rounded-lg transition-all ${
               tab === "signup"
-                ? "bg-white text-primary shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-slate-800 text-primary shadow-sm"
+                : "text-slate-400 hover:text-white"
             }`}
           >
             Sign Up
@@ -145,55 +145,55 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
         <form onSubmit={handleAuth} className="space-y-4">
           {tab === "signup" && (
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Full Name</label>
+              <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Full Name</label>
               <div className="relative">
-                <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                 <input
                   required
                   type="text"
                   placeholder="John Doe"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white/80 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white placeholder:text-slate-600 focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                 />
               </div>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Email Address</label>
+            <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Email Address</label>
             <div className="relative">
-              <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
               <input
                 required
                 type="email"
                 placeholder="john@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white/80 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white placeholder:text-slate-600 focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
               />
             </div>
           </div>
 
           {tab === "signup" && (
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Phone Number</label>
+              <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Phone Number</label>
               <div className="flex gap-2">
                 <CountryDropdown selectedCountry={selectedCountry} onChange={setSelectedCountry} />
                 <div className="relative flex-1">
-                  <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                   <input
                     required
                     type="tel"
                     placeholder={selectedCountry.example}
                     value={phoneVal}
                     onChange={(e) => setPhoneVal(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white/80 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-mono"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white placeholder:text-slate-600 focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-mono"
                   />
                 </div>
               </div>
-              <p className="text-[11px] text-gray-400 mt-1">
-                Format matching {selectedCountry.name}: <span className="font-mono">+{selectedCountry.dialCode} {selectedCountry.example}</span>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Format for {selectedCountry.name}: <span className="font-mono text-slate-400">+{selectedCountry.dialCode} {selectedCountry.example}</span>
               </p>
             </div>
           )}

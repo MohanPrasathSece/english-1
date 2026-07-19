@@ -1,88 +1,156 @@
+import { useState, useEffect, FormEvent } from "react";
+import { Shield, TrendingUp, Cpu, CheckCircle2, MessageSquare, Loader2, ArrowUpRight, HelpCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Shield, Heart, Sparkles, Clock, Star, CheckCircle2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import FadeInView from "@/components/FadeInView";
-import CTASection from "@/components/CTASection";
-import HomeFAQ from "@/components/HomeFAQ";
-import AnimatedCounter from "@/components/AnimatedCounter";
 import SEO from "@/components/SEO";
+import CountryDropdown, { countries, Country, cleanPhoneNumber } from "../components/CountryDropdown";
 
-import hero1 from "@/assets/hero-carousal/hero1.jpg";
-import hero1st from "@/assets/hero-carousal/hero1st.png";
-import hero2 from "@/assets/hero-carousal/hero2.png";
-import hero3 from "@/assets/hero-carousal/hero3.jpg";
-import hero4 from "@/assets/hero-carousal/hero4.png";
-import aboutFamily from "@/assets/about-family.jpg";
-import technology from "@/assets/technology.jpg";
-import bannerHome from "@/assets/banner-home.jpg";
-import fullscreen1 from "@/assets/fullscreenimages/banner-about.jpg";
-import fullscreen2 from "@/assets/fullscreenimages/banner-contact.jpg";
-import fullscreen3 from "@/assets/fullscreenimages/banner-services.jpg";
+export default function Home() {
+  const [sending, setSending] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
-const features = [
-  { icon: Shield, title: "Advanced Technology", desc: "State-of-the-art equipment for precise diagnostics and comfortable treatments." },
-  { icon: Heart, title: "Patient-First Care", desc: "Every treatment plan is tailored to your unique needs and comfort level." },
-  { icon: Sparkles, title: "Gentle Approach", desc: "Anxiety-free dentistry with a calming environment and compassionate team." },
-  { icon: Clock, title: "Flexible Scheduling", desc: "Appointments available to fit your busy lifestyle." },
-];
+  // Form states
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phoneVal, setPhoneVal] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState<Country>(countries[0]); // default CH
+  const [message, setMessage] = useState("");
 
-const heroImages = [hero1, hero1st, hero2, hero3, hero4];
-
-const testimonials = [
-  { name: "Rebecca M.", text: "The team at Orchid Dental made me feel completely at ease. Best dental experience I've ever had!", rating: 5 },
-  { name: "David L.", text: "Professional, gentle, and thorough. The team explained everything clearly and my treatment looks amazing.", rating: 5 },
-  { name: "Sarah K.", text: "My kids actually look forward to their dental visits now. The staff are so friendly and patient with children.", rating: 5 },
-];
-
-const Home = () => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  // Live prices
+  const [btcPrice, setBtcPrice] = useState(94250);
+  const [ethPrice, setEthPrice] = useState(3180);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
-    }, 3000);
-
+      setBtcPrice((prev) => prev + (Math.random() - 0.5) * 60);
+      setEthPrice((prev) => prev + (Math.random() - 0.5) * 6);
+    }, 2000);
     return () => clearInterval(interval);
   }, []);
 
+  const handleContactSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setSending(true);
+
+    const cleanDigits = cleanPhoneNumber(phoneVal, selectedCountry.dialCode);
+    const isValid = selectedCountry.regex.test(cleanDigits);
+
+    if (!isValid) {
+      toast.error(`Invalid phone number. Example for ${selectedCountry.name}: ${selectedCountry.example}`);
+      setSending(false);
+      return;
+    }
+
+    const formattedPhone = `+${selectedCountry.dialCode}${cleanDigits}`;
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          phone: formattedPhone,
+          country: selectedCountry.iso,
+          message,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.message || "We couldn't process your enquiry with the information provided.");
+        setSending(false);
+        return;
+      }
+
+      if (data.alreadyExists) {
+        toast.info(data.message || "Enquiry already registered.");
+      } else {
+        setShowSuccessDialog(true);
+      }
+
+      setMessage("");
+    } catch (err) {
+      toast.error("Failed to submit enquiry. Please check your network and try again.");
+    } finally {
+      setSending(false);
+    }
+  };
+
   return (
-    <div>
-      <SEO 
-        title="Dentist in Willesden" 
-        description="Modern, gentle dental care at Orchid Dental in Willesden, London—serving nearby Dollis Hill & Willesden Green. Check-ups, hygiene, Invisalign & more."
-        keywords="dentist Willesden, dentist near me Willesden, dental clinic Willesden, private dentist Willesden, emergency dentist Willesden, hygienist Willesden, scale and polish Willesden, teeth whitening Willesden, Invisalign Willesden, white fillings Willesden, root canal Willesden, tooth extraction Willesden, dental crowns Willesden, dentures Willesden, dentist near Dollis Hill, Dollis Hill dentist, dentist near Willesden Green, Willesden Green dentist, emergency dentist near Dollis Hill, Invisalign near Willesden Green"
+    <div className="min-h-screen bg-slate-950 text-slate-100 overflow-hidden relative">
+      <SEO
+        title="VertexIQ - Next-Generation Crypto Yield & Asset Safety"
+        description="Leverage institutional-grade AI market analysis, high security cold custody, and diversified digital asset portfolios on VertexIQ."
         canonical="/"
       />
-      {/* Hero */}
-      <section className="relative min-h-screen lg:h-screen overflow-hidden flex items-center justify-center" style={{backgroundImage: `url(${heroImages[currentImageIndex]})`, backgroundSize: 'cover', backgroundPosition: 'center'}}>
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
-        <div className="container mx-auto px-6 pt-20 pb-32">
+
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex items-center justify-center pt-20 pb-32">
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-900/20 via-slate-950 to-slate-950" />
+        <div className="absolute top-1/4 left-1/10 w-96 h-96 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/10 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="container mx-auto px-6 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <FadeInView>
-              <div className="text-white relative z-10">
-                <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-4">Welcome to Orchid Dental</p>
-                <h1 className="text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white leading-tight mb-6">
-                  Dental excellence for modern family.
-                </h1>
-                <p className="text-base text-white/90 leading-relaxed max-w-prose mb-8">
-                  Experience modern dentistry in a serene environment. Orchid Dental combines advanced technology with a gentle touch, ensuring every visit is comfortable and every smile is crafted with care.
+              <div>
+                <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-4">
+                  Welcome to VertexIQ
                 </p>
-                <p className="text-sm text-white/80 leading-relaxed max-w-prose mb-8">
-                  Based in Willesden, welcoming patients from Dollis Hill, Willesden, Brondesbury, Queens Park & Cricklewood.
+                <h1 className="text-4xl lg:text-6xl font-extrabold text-white leading-tight mb-6 font-sans">
+                  The Intelligent Way to Manage <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Digital Wealth</span>.
+                </h1>
+                <p className="text-base text-slate-300 leading-relaxed max-w-prose mb-8">
+                  Experience next-generation asset growth backed by AI market intelligence and offline cold-storage security. Gain maximum yield and peace of mind.
                 </p>
                 <div className="flex flex-wrap gap-4">
-                  <Link
-                    to="/contact"
+                  <a
+                    href="#contact-section"
                     className="inline-flex items-center px-6 py-3 rounded-lg bg-primary text-primary-foreground font-semibold hover:brightness-110 active:scale-95 transition-all duration-200"
                   >
-                    Contact Us
-                  </Link>
-                  <Link
-                    to="/treatments"
-                    className="inline-flex items-center px-6 py-3 rounded-lg bg-accent text-accent-foreground font-semibold hover:bg-accent/80 transition-colors duration-200"
+                    Get Started
+                  </a>
+                  <a
+                    href="#about-section"
+                    className="inline-flex items-center px-6 py-3 rounded-lg bg-slate-800 text-white font-semibold hover:bg-slate-750 transition-colors duration-200"
                   >
-                    View treatments
-                  </Link>
+                    Learn More
+                  </a>
+                </div>
+              </div>
+            </FadeInView>
+
+            {/* Trading Graph Preview */}
+            <FadeInView delay={0.2}>
+              <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-6 rounded-2xl shadow-medical-lg">
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Live Index Chart</h3>
+                    <p className="text-xs text-slate-400">Real-time asset value performance</p>
+                  </div>
+                  <span className="text-xs font-mono px-2.5 py-1 rounded bg-green-500/10 text-green-400">
+                    +12.4% Yield
+                  </span>
+                </div>
+                <div className="h-48 flex items-end gap-2.5 border-b border-slate-800 pb-2">
+                  <div className="w-full bg-slate-800 h-1/4 rounded-sm animate-pulse" />
+                  <div className="w-full bg-primary h-2/4 rounded-sm" />
+                  <div className="w-full bg-slate-800 h-1.5/4 rounded-sm animate-pulse" />
+                  <div className="w-full bg-indigo-500 h-3/4 rounded-sm" />
+                  <div className="w-full bg-primary h-4/4 rounded-sm" />
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-6">
+                  <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800/40">
+                    <p className="text-[10px] text-slate-400 font-semibold uppercase">Bitcoin (BTC)</p>
+                    <h4 className="text-sm font-mono font-bold text-white mt-1">${btcPrice.toFixed(2)}</h4>
+                  </div>
+                  <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800/40">
+                    <p className="text-[10px] text-slate-400 font-semibold uppercase">Ethereum (ETH)</p>
+                    <h4 className="text-sm font-mono font-bold text-white mt-1">${ethPrice.toFixed(2)}</h4>
+                  </div>
                 </div>
               </div>
             </FadeInView>
@@ -90,217 +158,261 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-20 bg-slate-50">
+      {/* Stats Ticker */}
+      <section className="py-12 bg-slate-900/40 border-y border-slate-900">
         <div className="container mx-auto px-6">
-          <FadeInView>
-            <div className="max-w-2xl mx-auto text-center mb-16">
-              <h2 className="text-gray-900 mb-4">Why families choose Orchid Dental</h2>
-              <p className="text-gray-600 text-base sm:text-lg">
-                For over a decade, we've been delivering exceptional dental care with a commitment to transparency, comfort, and clinical excellence.
-              </p>
-            </div>
-          </FadeInView>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((f, i) => (
-              <FadeInView key={i} delay={i * 0.1}>
-                <div className="p-6 rounded-2xl bg-card shadow-medical flex flex-col items-center text-center h-full">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                    <f.icon size={24} className="text-primary" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2 text-lg">{f.title}</h3>
-                  <p className="text-gray-600 leading-relaxed text-base">{f.desc}</p>
-                </div>
-              </FadeInView>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+            {[
+              { num: "100%", label: "Custody Guarantee" },
+              { num: "14.2%", label: "Average AI APY Boost" },
+              { num: "20+", label: "Supported Countries" },
+              { num: "$1.2B+", label: "Assets Secured" },
+            ].map((s) => (
+              <div key={s.label}>
+                <p className="text-3xl font-extrabold text-primary font-mono">{s.num}</p>
+                <p className="text-xs text-slate-400 uppercase mt-1">{s.label}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* About with image */}
-      <section className="py-20">
+      {/* Three Main Concept Sections */}
+      <section id="about-section" className="py-24">
         <div className="container mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <FadeInView>
-              <div className="rounded-2xl overflow-hidden shadow-medical-lg">
-                <img src={aboutFamily} alt="Happy family at Orchid Dental" className="w-full h-[360px] object-cover" />
-              </div>
-            </FadeInView>
-            <FadeInView delay={0.15}>
-              <div>
-                <p className="text-base font-semibold text-primary uppercase tracking-wider mb-3">About Us</p>
-                <h2 className="text-gray-900 mb-6">Our Mission</h2>
-                <p className="text-base text-gray-600 leading-relaxed mb-6">
-                  At our dental practice, we are guided by a deep commitment to patient-centered care, where every visit is approached with compassion, respect, and professionalism. We believe that dentistry is not just about treating teeth, but about fostering trust and comfort, ensuring that each patient feels heard, valued, and cared for.
-                </p>
-                <p className="text-base text-gray-600 leading-relaxed mb-8">
-                  From gentle preventive treatments to advanced restorative procedures, we combine expertise with empathy, creating an environment where oral health is nurtured with attention to both clinical excellence and personal well-being. Your smile is our priority, and our ethos is rooted in providing care that is thorough, thoughtful, and tailored to your unique needs.
-                </p>
-                <Link
-                  to="/team"
-                  className="inline-flex items-center px-6 py-3 rounded-lg bg-accent text-accent-foreground font-semibold hover:bg-accent/80 transition-colors duration-200"
-                >
-                  Meet our team
-                </Link>
-              </div>
-            </FadeInView>
+          <div className="max-w-2xl mx-auto text-center mb-20">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Core Principles of VertexIQ</h2>
+            <p className="text-slate-400 text-base">
+              A comprehensive architecture built to increase your wealth under ultimate safety standards.
+            </p>
           </div>
-        </div>
-      </section>
 
-      {/* Treatments CTA */}
-      <CTASection 
-        title="Comprehensive dental treatments" 
-        subtitle="From routine check-ups to advanced cosmetic procedures, we offer a full range of dental services tailored to your needs."
-        buttonText="View All Treatments"
-        to="/treatments"
-        image={fullscreen3}
-      />
-
-      {/* Technology */}
-      <section className="py-20 bg-card">
-        <div className="container mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Section 1: Basics */}
             <FadeInView>
-              <p className="text-base font-semibold text-primary uppercase tracking-wider mb-3">Our Technology</p>
-              <h2 className="text-foreground mb-6">State-of-the-art dental equipment</h2>
-              <p className="text-base text-muted leading-relaxed mb-6">
-                We invest in the latest dental technology to ensure the best possible care for our patients. Our modern equipment allows for more accurate diagnoses, comfortable treatments, and better outcomes.
-              </p>
-              <ul className="space-y-3 text-base text-muted mb-8">
-                {["Digital X-ray technology", "Advanced sterilization systems", "Comfort-focused equipment"].map(item => (
-                  <li key={item} className="flex items-center gap-2">
-                    <CheckCircle2 size={16} className="text-primary shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                to="/treatments"
-                className="inline-flex items-center px-6 py-3 rounded-lg bg-primary text-primary-foreground font-semibold hover:brightness-110 transition-colors duration-200"
-              >
-                View all treatments
-              </Link>
-            </FadeInView>
-            <FadeInView delay={0.15}>
-              <div className="rounded-2xl overflow-hidden shadow-medical-lg">
-                <img src={technology} alt="Modern dental equipment at Orchid Dental" className="w-full h-[360px] object-cover" />
-              </div>
-            </FadeInView>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="py-20">
-        <div className="container mx-auto px-6">
-          <FadeInView>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
-              {[
-                { num: "15+", label: "Years experience" },
-                { num: "10k+", label: "Happy patients" },
-                { num: "98%", label: "Satisfaction rate" },
-                { num: "5", label: "Dentists" },
-              ].map(s => (
-                <div key={s.label} className="p-8 rounded-2xl bg-card shadow-medical text-center">
-                  <p className="text-3xl font-bold text-primary font-mono">
-                    <AnimatedCounter end={s.num} duration={2000} />
+              <div className="bg-slate-900/30 backdrop-blur-md border border-slate-800/60 p-8 rounded-2xl h-full flex flex-col justify-between">
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6">
+                    <Cpu size={24} />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-4">Cryptocurrency & Blockchain Basics</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed mb-6">
+                    Digital assets run on cryptographically secured, immutable ledgers. We make it easy to transition from legacy fiat systems to decentralized blockchain networks.
                   </p>
-                  <p className="text-sm text-muted mt-1">{s.label}</p>
                 </div>
-              ))}
-            </div>
-          </FadeInView>
-        </div>
-      </section>
+                <ul className="space-y-3 text-xs text-slate-300">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 size={14} className="text-primary shrink-0" /> Smart Contract Protocols
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 size={14} className="text-primary shrink-0" /> Decentralized Ledger Auditability
+                  </li>
+                </ul>
+              </div>
+            </FadeInView>
 
-      {/* Testimonials */}
-      <section className="py-20 bg-slate-50">
-        <div className="container mx-auto px-6">
-          <FadeInView>
-            <div className="text-center mb-16">
-              <p className="text-base font-semibold text-primary uppercase tracking-wider mb-3">Testimonials</p>
-              <h2 className="text-foreground mb-4">What our patients say</h2>
-              <p className="text-base text-muted max-w-2xl mx-auto">
-                Don't just take our word for it. Here's what our patients have to say about their experience at Orchid Dental.
-              </p>
-            </div>
-          </FadeInView>
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((t, i) => (
-              <FadeInView key={i} delay={i * 0.1}>
-                <div className="bg-card rounded-2xl p-4 sm:p-6 shadow-medical min-h-[240px] sm:min-h-[280px] flex flex-col">
-                  <div className="flex items-center gap-1 mb-4">
-                    {Array.from({ length: 5 }).map((_, star) => (
-                      <Star key={star} size={16} className="fill-yellow-400 text-yellow-400" />
-                    ))}
+            {/* Section 2: Improving Investment Amount */}
+            <FadeInView delay={0.15}>
+              <div className="bg-slate-900/30 backdrop-blur-md border border-slate-800/60 p-8 rounded-2xl h-full flex flex-col justify-between">
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6">
+                    <TrendingUp size={24} />
                   </div>
-                  <blockquote className="text-sm md:text-[10px] lg:text-sm xl:text-lg text-muted leading-relaxed flex-1 mb-6">
-                    "{t.text}"
-                  </blockquote>
-                  <div className="border-t border-gray-100 pt-4">
-                    <p className="font-semibold text-foreground text-sm md:text-[10px] lg:text-sm xl:text-lg">{t.name}</p>
-                    <p className="text-xs md:text-[8px] lg:text-xs xl:text-base text-muted">Patient</p>
-                  </div>
+                  <h3 className="text-xl font-bold text-white mb-4">AI Investment Growth</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed mb-6">
+                    How we improve your investment amount: our automated market analysis algorithm executes real-time dollar-cost averaging, dynamic yield indexing, and risk-adjusted rebalancing.
+                  </p>
                 </div>
-              </FadeInView>
-            ))}
+                <ul className="space-y-3 text-xs text-slate-300">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 size={14} className="text-primary shrink-0" /> Strategic Yield Optimizers
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 size={14} className="text-primary shrink-0" /> Algorithmic Cycle Detection
+                  </li>
+                </ul>
+              </div>
+            </FadeInView>
+
+            {/* Section 3: Safe & Secure */}
+            <FadeInView delay={0.3}>
+              <div className="bg-slate-900/30 backdrop-blur-md border border-slate-800/60 p-8 rounded-2xl h-full flex flex-col justify-between">
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6">
+                    <Shield size={24} />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-4">Absolute Security & Safety</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed mb-6">
+                    How safe is your capital? We use offline cold storage, multi-signature keys, and continuous zero-knowledge security audits.
+                  </p>
+                </div>
+                <ul className="space-y-3 text-xs text-slate-300">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 size={14} className="text-primary shrink-0" /> 100% Offline Vault Storage
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 size={14} className="text-primary shrink-0" /> Multi-Signature Approvals
+                  </li>
+                </ul>
+              </div>
+            </FadeInView>
           </div>
         </div>
       </section>
 
-      {/* Map */}
-      <section className="py-20">
-        <div className="container mx-auto px-6">
-          <FadeInView>
-            <div className="max-w-2xl mx-auto text-center mb-12">
-              <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">Find Us</p>
-              <h2 className="text-foreground mb-4">Visit our clinic</h2>
-              <p className="text-muted">158–160 High Road, London NW10 2PB</p>
+      {/* Candlestick Interactive Trading chart section */}
+      <section className="py-16 bg-slate-900/20 border-y border-slate-900/80">
+        <div className="container mx-auto px-6 max-w-4xl">
+          <div className="text-center mb-10">
+            <h3 className="text-2xl font-bold text-white mb-2">Live Marketplace Index</h3>
+            <p className="text-sm text-slate-400">Institutional grade candlestick signals updated in real-time</p>
+          </div>
+          <div className="bg-slate-900/60 border border-slate-850 p-6 rounded-2xl">
+            <svg viewBox="0 0 500 120" className="w-full h-32">
+              <line x1="50" y1="20" x2="50" y2="80" stroke="#ef4444" strokeWidth="2" />
+              <rect x="46" y="30" width="8" height="30" fill="#ef4444" />
+
+              <line x1="110" y1="30" x2="110" y2="90" stroke="#10b981" strokeWidth="2" />
+              <rect x="106" y="40" width="8" height="40" fill="#10b981" />
+
+              <line x1="170" y1="10" x2="170" y2="80" stroke="#10b981" strokeWidth="2" />
+              <rect x="166" y="20" width="8" height="50" fill="#10b981" />
+
+              <line x1="230" y1="40" x2="230" y2="100" stroke="#ef4444" strokeWidth="2" />
+              <rect x="226" y="50" width="8" height="35" fill="#ef4444" />
+
+              <line x1="290" y1="20" x2="290" y2="90" stroke="#10b981" strokeWidth="2" />
+              <rect x="286" y="30" width="8" height="45" fill="#10b981" />
+
+              <line x1="350" y1="10" x2="350" y2="70" stroke="#10b981" strokeWidth="2" />
+              <rect x="346" y="15" width="8" height="45" fill="#10b981" />
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      {/* Homepage Contact Form Section */}
+      <section id="contact-section" className="py-24 relative z-10">
+        <div className="container mx-auto px-6 max-w-2xl">
+          <div className="bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl">
+            <div className="flex items-center gap-3 mb-6">
+              <MessageSquare className="text-primary w-6 h-6" />
+              <h2 className="text-2xl font-bold text-white">Contact Our Desk</h2>
             </div>
-          </FadeInView>
-          <FadeInView delay={0.1}>
-            <div className="rounded-2xl overflow-hidden shadow-medical-lg max-w-4xl mx-auto h-[350px]">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2481.129349878369!2d-0.2343988!3d51.547527099999996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x48761052ca717043%3A0x66d4a3228fac5d1e!2sOrchid%20Dental!5e0!3m2!1sen!2sin!4v1773546596060!5m2!1sen!2sin"
-                width="600"
-                height="450"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                className="w-full h-full"
-              />
-            </div>
-          </FadeInView>
+            <p className="text-sm text-slate-400 mb-8">
+              Ask a question about digital assets, APY cycles, or cold storage custody. Our representatives will respond shortly.
+            </p>
+
+            <form onSubmit={handleContactSubmit} className="space-y-6">
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Full Name</label>
+                <input
+                  required
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-primary transition-all"
+                  placeholder="John Smith"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Phone</label>
+                <div className="flex gap-2">
+                  <CountryDropdown selectedCountry={selectedCountry} onChange={setSelectedCountry} />
+                  <input
+                    required
+                    type="tel"
+                    value={phoneVal}
+                    onChange={(e) => setPhoneVal(e.target.value)}
+                    className="flex-1 px-4 py-3 bg-slate-950 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-primary transition-all font-mono"
+                    placeholder={selectedCountry.example}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Email Address</label>
+                <input
+                  required
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-primary transition-all"
+                  placeholder="john@example.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Message (Optional)</label>
+                <textarea
+                  rows={4}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-primary transition-all resize-none"
+                  placeholder="How can we assist you?"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={sending}
+                className="w-full py-3.5 rounded-lg bg-primary text-primary-foreground font-semibold hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
+              >
+                {sending && <Loader2 size={16} className="animate-spin" />}
+                {sending ? "Sending..." : "Submit Inquiry"}
+              </button>
+            </form>
+          </div>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <HomeFAQ />
-
-      {/* Banner */}
-      <section className="relative h-[300px] overflow-hidden">
-        <img src={bannerHome} alt="Orchid Dental clinic" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-black/40" />
-        <div className="relative h-full flex items-center justify-center text-center px-6">
-          <FadeInView>
-            <h2 className="text-white mb-4">Your smile is our passion</h2>
-            <p className="text-white/90 text-base sm:text-lg max-w-lg mx-auto mb-6">
-              Experience the difference of modern, compassionate dental care.
-            </p>
-            <Link
-              to="/contact"
-              className="inline-flex items-center px-6 py-3 sm:px-8 sm:py-4 rounded-lg bg-white text-primary font-semibold text-base sm:text-lg hover:bg-gray-100 active:scale-95 transition-all duration-200"
-            >
-              Contact Us
-            </Link>
-          </FadeInView>
+      <section className="py-20 bg-slate-950">
+        <div className="container mx-auto px-6 max-w-3xl">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-bold text-white mb-2">Frequently Asked Questions</h2>
+            <p className="text-sm text-slate-400">Everything you need to know about VertexIQ</p>
+          </div>
+          <div className="space-y-4">
+            <details className="bg-slate-900 border border-slate-800 p-4 rounded-xl cursor-pointer">
+              <summary className="text-sm font-semibold text-white">How does the AI yield boost work?</summary>
+              <p className="text-xs text-slate-400 mt-3 leading-relaxed">
+                We monitor liquidity pools and arbitrage differentials globally. The system reallocates capital to safe, high-yielding contracts instantly.
+              </p>
+            </details>
+            <details className="bg-slate-900 border border-slate-800 p-4 rounded-xl cursor-pointer">
+              <summary className="text-sm font-semibold text-white">Are my funds guaranteed?</summary>
+              <p className="text-xs text-slate-400 mt-3 leading-relaxed">
+                Yes, our zero-connectivity vaults ensure cold storage, meaning your assets are disconnected from the network and protected from any online security breach.
+              </p>
+            </details>
+          </div>
         </div>
       </section>
+
+      {/* Success Dialog */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-md text-center p-8 bg-slate-900 border border-slate-800 text-white">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-green-950 border border-green-500/30 flex items-center justify-center mb-2">
+              <CheckCircle2 className="w-8 h-8 text-green-400" />
+            </div>
+            <DialogHeader>
+              <DialogTitle className="text-2xl text-center">Message Sent!</DialogTitle>
+              <DialogDescription className="text-center text-slate-400 pt-2">
+                Thank you for getting in touch. We have received your message and will contact you shortly.
+              </DialogDescription>
+            </DialogHeader>
+            <button
+              onClick={() => setShowSuccessDialog(false)}
+              className="mt-6 px-8 py-2.5 bg-primary text-primary-foreground font-medium rounded-lg hover:brightness-110 transition-all focus:outline-none"
+            >
+              Continue
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
-};
-
-export default Home;
+}

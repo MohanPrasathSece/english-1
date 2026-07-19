@@ -1,66 +1,70 @@
-import PageBanner from "@/components/PageBanner";
-import bannerImage from "@/assets/fullscreenimages/banner-about.jpg";
 import SEO from "@/components/SEO";
 
 export default function PrivacyPolicy() {
   return (
-    <div>
+    <div className="min-h-screen bg-slate-950 text-white">
       <SEO
-        title="Privacy Policy - Orchid Dental"
-        description="Read our Privacy Policy to understand how we collect, process, and protect your personal information."
+        title="Privacy Policy - VertexIQ"
+        description="Read VertexIQ's Privacy Policy to understand how we collect, use, and protect your personal information."
         canonical="/privacy-policy"
       />
-      <PageBanner
-        image={bannerImage}
-        title="Privacy Policy"
-        subtitle="Last Updated: July 2026"
-        badge="Legal Information"
-      />
-      <div className="container mx-auto px-6 py-16 max-w-4xl text-slate-800">
-        <div className="prose prose-slate max-w-none space-y-6 text-base">
-          <p>
-            Welcome to Orchid Dental. We respect your privacy and are committed to protecting your personal data. This privacy policy will inform you as to how we look after your personal data when you visit our website and tell you about your privacy rights and how the law protects you.
-          </p>
 
-          <h2 className="text-xl font-bold mt-8 text-slate-900 border-b pb-2">1. Information Collection</h2>
-          <p>
-            We may collect, use, store and transfer different kinds of personal data about you which we have grouped together as follows:
-          </p>
-          <ul className="list-disc pl-6 space-y-2">
-            <li><strong>Identity Data:</strong> includes first name, last name, username or similar identifier.</li>
-            <li><strong>Contact Data:</strong> includes email address, telephone numbers, and country.</li>
-            <li><strong>Technical Data:</strong> includes internet protocol (IP) address, browser type and version, time zone setting and location.</li>
-          </ul>
+      <div className="relative py-28 flex items-center justify-center border-b border-slate-900 bg-gradient-to-b from-blue-900/10 to-slate-950">
+        <div className="text-center px-6">
+          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-3">Legal</p>
+          <h1 className="text-4xl font-extrabold text-white mb-3">Privacy Policy</h1>
+          <p className="text-slate-400 text-sm">Last Updated: July 2026</p>
+        </div>
+      </div>
 
-          <h2 className="text-xl font-bold mt-8 text-slate-900 border-b pb-2">2. Data Usage & CRM Processing</h2>
-          <p>
-            When you complete a form on our website, your information is submitted to our secure backend CRM system. The CRM manages lead notifications and helps our support team contact you directly regarding your inquiry.
-          </p>
+      <div className="container mx-auto px-6 py-16 max-w-3xl">
+        <div className="space-y-10 text-sm text-slate-300 leading-relaxed">
 
-          <h2 className="text-xl font-bold mt-8 text-slate-900 border-b pb-2">3. Cookies and Tracking</h2>
-          <p>
-            We use cookies to improve your user experience, analyze site traffic, and understand where our audience is coming from. You can set your browser to refuse all or some browser cookies, or to alert you when websites set or access cookies.
-          </p>
+          <section>
+            <h2 className="text-lg font-bold text-white mb-3 border-b border-slate-800 pb-2">1. Information We Collect</h2>
+            <p>When you register or contact us through VertexIQ, we collect personal information including your full name, email address, phone number, and country of residence. We also collect technical data such as your IP address and browser type for security and analytics purposes.</p>
+          </section>
 
-          <h2 className="text-xl font-bold mt-8 text-slate-900 border-b pb-2">4. Data Retention</h2>
-          <p>
-            We will only retain your personal data for as long as necessary to fulfill the purposes we collected it for, including for the purposes of satisfying any legal, accounting, or reporting requirements.
-          </p>
+          <section>
+            <h2 className="text-lg font-bold text-white mb-3 border-b border-slate-800 pb-2">2. How We Use Your Information</h2>
+            <p>Your data is used to process your registration, verify your identity, deliver our digital asset platform services, and respond to enquiries. We do not sell your personal data to any third parties.</p>
+          </section>
 
-          <h2 className="text-xl font-bold mt-8 text-slate-900 border-b pb-2">5. User Rights</h2>
-          <p>
-            Under certain circumstances, you have rights under data protection laws in relation to your personal data, including the right to request access, correction, erasure, or restriction of your personal data.
-          </p>
+          <section>
+            <h2 className="text-lg font-bold text-white mb-3 border-b border-slate-800 pb-2">3. CRM Processing</h2>
+            <p>When you submit a contact or registration form, your information is securely transmitted to our CRM system for lead management and client relationship purposes. This is done server-side only — your CRM credentials and tokens are never exposed to the browser.</p>
+          </section>
 
-          <h2 className="text-xl font-bold mt-8 text-slate-900 border-b pb-2">6. Security</h2>
-          <p>
-            We have put in place appropriate security measures to prevent your personal data from being accidentally lost, used or accessed in an unauthorized way, altered or disclosed.
-          </p>
+          <section>
+            <h2 className="text-lg font-bold text-white mb-3 border-b border-slate-800 pb-2">4. Cookies & Tracking</h2>
+            <p>We use session cookies to maintain your authenticated state after login. We may also use analytics cookies to understand how our platform is used. You may disable cookies in your browser settings, though some features may not function correctly.</p>
+          </section>
 
-          <h2 className="text-xl font-bold mt-8 text-slate-900 border-b pb-2">7. Contact Us</h2>
-          <p>
-            If you have any questions about this privacy policy or our privacy practices, please contact us at: <a href="mailto:info@orchiddental.co.uk" className="text-primary hover:underline">info@orchiddental.co.uk</a>.
-          </p>
+          <section>
+            <h2 className="text-lg font-bold text-white mb-3 border-b border-slate-800 pb-2">5. Data Storage & Security</h2>
+            <p>User data is stored in private, encrypted cloud storage using Vercel Blob. Access is restricted exclusively to server-side processes. Session tokens are cryptographically generated and invalidated upon logout. We apply industry-standard security protocols across all systems.</p>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold text-white mb-3 border-b border-slate-800 pb-2">6. Data Retention</h2>
+            <p>We retain your personal information for as long as your account remains active or as required to fulfill legal obligations. You may request deletion of your account and associated data at any time.</p>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold text-white mb-3 border-b border-slate-800 pb-2">7. Your Rights</h2>
+            <p>You have the right to access, rectify, or erase your personal data. You may also request restrictions on processing or object to the use of your data for marketing purposes. To exercise these rights, contact us at the email below.</p>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold text-white mb-3 border-b border-slate-800 pb-2">8. International Transfers</h2>
+            <p>Your data may be processed in countries outside your own. We ensure adequate safeguards are in place, including reliance on standard contractual clauses where required by applicable law.</p>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold text-white mb-3 border-b border-slate-800 pb-2">9. Contact Us</h2>
+            <p>If you have any questions about this Privacy Policy or how we handle your data, please contact us at: <a href="mailto:privacy@vertexiq.com" className="text-primary hover:underline">privacy@vertexiq.com</a></p>
+          </section>
+
         </div>
       </div>
     </div>
