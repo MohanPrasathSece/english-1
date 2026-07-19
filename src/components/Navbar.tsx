@@ -91,7 +91,7 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
               onClick={() => handleNavClick("/dashboard")}
               className="relative px-4 py-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors duration-200"
             >
-              My Portal
+              Inside Asset Circle
               {location.pathname === "/dashboard" && (
                 <motion.div
                   layoutId="nav-underline"
@@ -221,7 +221,7 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
                         className={"flex items-center justify-between rounded-2xl px-5 py-4 text-base font-semibold transition-colors " +
                           (location.pathname === "/dashboard" ? "bg-primary/10 text-primary" : "text-primary hover:bg-primary/5")}
                       >
-                        <span>My Portal</span>
+                        <span>Inside Asset Circle</span>
                         <ChevronRight size={18} className="text-primary" />
                       </Link>
                     </motion.div>
