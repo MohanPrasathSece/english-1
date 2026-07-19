@@ -77,12 +77,12 @@ export default function Home({ onOpenAuth, user }: HomeProps) {
       </div>
 
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center justify-center pt-12 pb-32 overflow-hidden">
+      <section className="relative min-h-[90vh] flex items-center justify-center pt-24 pb-20 md:pt-12 md:pb-32 overflow-hidden">
         <motion.div style={{ y: yHeroBg }} className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
-        <div className="absolute top-1/4 left-1/10 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/10 w-[500px] h-[500px] bg-blue-100/50 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute top-1/4 left-1/10 w-64 h-64 md:w-96 md:h-96 bg-primary/10 rounded-full blur-[80px] md:blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/10 w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-blue-100/50 rounded-full blur-[80px] md:blur-[100px] pointer-events-none" />
 
-        <div className="container mx-auto px-6 relative z-10">
+        <div className="container mx-auto px-4 md:px-6 relative z-10">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             
             {/* Left Copy */}
@@ -98,7 +98,7 @@ export default function Home({ onOpenAuth, user }: HomeProps) {
                 </span>
                 Institutional Intelligence Now Public
               </div>
-              <h1 className="text-5xl lg:text-7xl font-extrabold text-foreground leading-[1.1] mb-6 tracking-tight">
+              <h1 className="text-4xl md:text-5xl lg:text-7xl font-extrabold text-foreground leading-[1.1] mb-6 tracking-tight">
                 The Intelligent Way to Manage{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">
                   Digital Wealth
@@ -108,12 +108,12 @@ export default function Home({ onOpenAuth, user }: HomeProps) {
                 Experience next-generation asset growth backed by AI market intelligence and offline cold-storage security. Outperform traditional markets with algorithmic precision.
               </p>
               
-              <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-8">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-8 w-full">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleCTA}
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-primary text-primary-foreground font-bold text-lg shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-primary text-primary-foreground font-bold text-lg shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all"
                 >
                   {user ? "Access Dashboard" : "Secure Your Allocation"} <ArrowRight size={20} />
                 </motion.button>
@@ -122,7 +122,7 @@ export default function Home({ onOpenAuth, user }: HomeProps) {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => onOpenAuth("login")}
-                    className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-secondary border border-border text-foreground font-semibold hover:bg-secondary/80 transition-all"
+                    className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl bg-secondary border border-border text-foreground font-semibold hover:bg-secondary/80 transition-all"
                   >
                     Client Login
                   </motion.button>
@@ -149,7 +149,7 @@ export default function Home({ onOpenAuth, user }: HomeProps) {
               className="relative perspective-1000"
             >
               <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-blue-500/20 rounded-3xl blur-2xl transform scale-105" />
-              <div className="bg-card border border-border p-6 rounded-3xl shadow-2xl relative overflow-hidden">
+              <div className="bg-card border border-border p-4 md:p-6 rounded-3xl shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-blue-500 to-primary" />
                 
                 <div className="flex justify-between items-center mb-6">
@@ -255,8 +255,8 @@ export default function Home({ onOpenAuth, user }: HomeProps) {
       </section>
 
       {/* Authenticity / Institutional Architecture */}
-      <section id="platform" className="py-24 relative overflow-hidden">
-        <div className="container mx-auto px-6 relative z-10">
+      <section id="platform" className="py-16 md:py-24 relative overflow-hidden">
+        <div className="container mx-auto px-4 md:px-6 relative z-10">
           <FadeInView>
             <div className="max-w-3xl mx-auto text-center mb-20">
               <span className="text-primary font-semibold tracking-widest uppercase text-xs mb-3 block">Why Asset Circle</span>
@@ -269,7 +269,7 @@ export default function Home({ onOpenAuth, user }: HomeProps) {
 
           <div className="grid lg:grid-cols-3 gap-8">
             <FadeInView delay={0.1}>
-              <div className="group bg-card border border-border p-8 rounded-3xl h-full flex flex-col hover:border-primary/50 transition-colors shadow-sm hover:shadow-md">
+              <div className="group bg-card border border-border p-6 md:p-8 rounded-3xl h-full flex flex-col hover:border-primary/50 transition-colors shadow-sm hover:shadow-md">
                 <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
                   <Cpu size={28} />
                 </div>
@@ -284,7 +284,7 @@ export default function Home({ onOpenAuth, user }: HomeProps) {
             </FadeInView>
 
             <FadeInView delay={0.2}>
-              <div className="group bg-card border border-border p-8 rounded-3xl h-full flex flex-col hover:border-blue-500/50 transition-colors shadow-sm hover:shadow-md">
+              <div className="group bg-card border border-border p-6 md:p-8 rounded-3xl h-full flex flex-col hover:border-blue-500/50 transition-colors shadow-sm hover:shadow-md">
                 <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 mb-6 group-hover:scale-110 transition-transform">
                   <Lock size={28} />
                 </div>
@@ -299,7 +299,7 @@ export default function Home({ onOpenAuth, user }: HomeProps) {
             </FadeInView>
 
             <FadeInView delay={0.3}>
-              <div className="group bg-card border border-border p-8 rounded-3xl h-full flex flex-col hover:border-green-500/50 transition-colors shadow-sm hover:shadow-md">
+              <div className="group bg-card border border-border p-6 md:p-8 rounded-3xl h-full flex flex-col hover:border-green-500/50 transition-colors shadow-sm hover:shadow-md">
                 <div className="w-14 h-14 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-500 mb-6 group-hover:scale-110 transition-transform">
                   <Building size={28} />
                 </div>
@@ -317,8 +317,8 @@ export default function Home({ onOpenAuth, user }: HomeProps) {
       </section>
 
       {/* Technology / Integrations (New Section) */}
-      <section id="security" className="py-24 bg-secondary/50 border-t border-border relative overflow-hidden">
-        <div className="container mx-auto px-6 max-w-5xl relative z-10">
+      <section id="security" className="py-16 md:py-24 bg-secondary/50 border-t border-border relative overflow-hidden">
+        <div className="container mx-auto px-4 md:px-6 max-w-5xl relative z-10">
           <FadeInView>
             <div className="text-center mb-16">
               <span className="text-primary font-semibold tracking-widest uppercase text-xs mb-3 block">Technology Stack</span>
@@ -331,7 +331,7 @@ export default function Home({ onOpenAuth, user }: HomeProps) {
 
           <div className="grid md:grid-cols-2 gap-8">
             <FadeInView delay={0.1}>
-              <div className="bg-card border border-border p-8 rounded-3xl shadow-sm h-full flex flex-col justify-center relative overflow-hidden group">
+              <div className="bg-card border border-border p-6 md:p-8 rounded-3xl shadow-sm h-full flex flex-col justify-center relative overflow-hidden group">
                 <div className="absolute -right-10 -top-10 text-primary opacity-5 group-hover:opacity-10 transition-opacity">
                   <Activity size={200} />
                 </div>
@@ -347,7 +347,7 @@ export default function Home({ onOpenAuth, user }: HomeProps) {
               </div>
             </FadeInView>
             <FadeInView delay={0.2}>
-              <div className="bg-card border border-border p-8 rounded-3xl shadow-sm h-full flex flex-col justify-center relative overflow-hidden group">
+              <div className="bg-card border border-border p-6 md:p-8 rounded-3xl shadow-sm h-full flex flex-col justify-center relative overflow-hidden group">
                 <div className="absolute -right-10 -top-10 text-blue-500 opacity-5 group-hover:opacity-10 transition-opacity">
                   <Shield size={200} />
                 </div>
@@ -367,14 +367,14 @@ export default function Home({ onOpenAuth, user }: HomeProps) {
       </section>
 
       {/* Urgency CTA Section */}
-      <section className="py-24 relative overflow-hidden bg-primary text-primary-foreground">
+      <section className="py-16 md:py-24 relative overflow-hidden bg-primary text-primary-foreground">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-white/20 blur-3xl rounded-full pointer-events-none" />
         
-        <div className="container mx-auto px-6 relative z-10 text-center">
+        <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
           <FadeInView>
-            <h2 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight">Don't Miss the Q3 Allocation</h2>
-            <p className="text-xl opacity-90 max-w-2xl mx-auto mb-10">
+            <h2 className="text-3xl md:text-5xl font-extrabold mb-6 tracking-tight">Don't Miss the Q3 Allocation</h2>
+            <p className="text-lg md:text-xl opacity-90 max-w-2xl mx-auto mb-10">
               We limit onboarding to ensure maximum yield stability for our clients. Only <strong className="text-white bg-black/20 px-2 py-1 rounded mx-1">{seatsLeft}</strong> spots remain before registration closes.
             </p>
             
@@ -383,7 +383,7 @@ export default function Home({ onOpenAuth, user }: HomeProps) {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleCTA}
-                className="px-10 py-5 rounded-2xl bg-background text-foreground font-bold text-lg shadow-xl shadow-black/10 hover:shadow-2xl transition-all"
+                className="w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 rounded-2xl bg-background text-foreground font-bold text-base md:text-lg shadow-xl shadow-black/10 hover:shadow-2xl transition-all"
               >
                 Claim Your Account Now
               </motion.button>
@@ -397,8 +397,8 @@ export default function Home({ onOpenAuth, user }: HomeProps) {
       </section>
 
       {/* Expanded FAQ Section */}
-      <section id="faq" className="py-24 bg-background">
-        <div className="container mx-auto px-6 max-w-3xl">
+      <section id="faq" className="py-16 md:py-24 bg-background">
+        <div className="container mx-auto px-4 md:px-6 max-w-3xl">
           <FadeInView>
             <div className="text-center mb-16">
               <span className="text-primary font-semibold tracking-widest uppercase text-xs mb-3 block">Knowledge Base</span>
@@ -416,14 +416,14 @@ export default function Home({ onOpenAuth, user }: HomeProps) {
               { q: "Do I need prior cryptocurrency experience?", a: "Not at all. Asset Circle is designed as a 'set-and-forget' wealth management portal. Our dashboard abstracts away the complexities of blockchain networks, private key management, and gas fees. You simply deposit, monitor your yield, and withdraw." }
             ].map((faq, i) => (
               <FadeInView key={i} delay={i * 0.1}>
-                <details className="bg-card border border-border p-6 rounded-2xl cursor-pointer group shadow-sm hover:shadow-md transition-all">
-                  <summary className="text-base font-bold text-foreground list-none flex justify-between items-center">
+                <details className="bg-card border border-border p-4 md:p-6 rounded-2xl cursor-pointer group shadow-sm hover:shadow-md transition-all">
+                  <summary className="text-sm md:text-base font-bold text-foreground list-none flex justify-between items-center gap-4">
                     {faq.q}
-                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center group-open:rotate-45 transition-transform">
+                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0 group-open:rotate-45 transition-transform">
                       <span className="text-primary text-xl leading-none">+</span>
                     </div>
                   </summary>
-                  <p className="text-sm text-muted-foreground mt-4 leading-relaxed pr-8 border-t border-border pt-4">
+                  <p className="text-xs md:text-sm text-muted-foreground mt-4 leading-relaxed md:pr-8 border-t border-border pt-4">
                     {faq.a}
                   </p>
                 </details>

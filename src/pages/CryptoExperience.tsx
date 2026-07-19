@@ -54,14 +54,14 @@ export default function CryptoExperience() {
       <SEO title="Inside Asset Circle | Methodology & Company" canonical="/dashboard" />
 
       {/* Intro Section */}
-      <section className="pt-32 pb-16 relative overflow-hidden bg-gradient-to-b from-primary/5 to-background">
-        <div className="container mx-auto px-6 max-w-4xl text-center relative z-10">
+      <section className="pt-24 pb-12 md:pt-32 md:pb-16 relative overflow-hidden bg-gradient-to-b from-primary/5 to-background">
+        <div className="container mx-auto px-4 md:px-6 max-w-4xl text-center relative z-10">
           <FadeInView>
             <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-3">Client Portal</p>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight mb-6">
+            <h1 className="text-3xl md:text-5xl font-extrabold text-foreground tracking-tight mb-4 md:mb-6">
               Inside Asset Circle
             </h1>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-base md:text-lg text-muted-foreground">
               Discover our institutional framework, core philosophy, and how we operate in global financial markets.
             </p>
           </FadeInView>
@@ -69,25 +69,25 @@ export default function CryptoExperience() {
       </section>
 
       {/* Methods Section */}
-      <section id="methods" className="py-24 border-t border-border">
-        <div className="container mx-auto px-6 max-w-6xl">
+      <section id="methods" className="py-16 md:py-24 border-t border-border">
+        <div className="container mx-auto px-4 md:px-6 max-w-6xl">
           <FadeInView>
-            <div className="text-center mb-16">
+            <div className="text-center mb-12 md:mb-16">
               <span className="text-primary font-semibold tracking-widest uppercase text-xs mb-3 block">Operational Blueprint</span>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Our Working Methods</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
                 Algorithmic Precision meets Human Oversight. We do not rely on speculative guessing; instead, we deploy deterministic algorithms that capture market inefficiencies.
               </p>
             </div>
           </FadeInView>
 
-          <div className="grid md:grid-cols-2 gap-8 mb-8">
+          <div className="grid md:grid-cols-2 gap-6 md:gap-8 mb-8">
             <FadeInView delay={0.1}>
-              <div className="p-8 bg-card rounded-3xl border border-border shadow-sm h-full group hover:border-primary/50 transition-colors">
-                <div className="w-14 h-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <div className="p-6 md:p-8 bg-card rounded-3xl border border-border shadow-sm h-full group hover:border-primary/50 transition-colors">
+                <div className="w-12 h-12 md:w-14 md:h-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <Target size={28} />
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-4">Arbitrage Detection</h3>
+                <h3 className="text-lg md:text-xl font-bold text-foreground mb-3 md:mb-4">Arbitrage Detection</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Our systems continuously scan global liquidity pools to find price disparities across decentralized exchanges. By executing simultaneous buy and sell orders, we lock in yield without directional market risk.
                 </p>
@@ -95,11 +95,11 @@ export default function CryptoExperience() {
             </FadeInView>
 
             <FadeInView delay={0.2}>
-              <div className="p-8 bg-card rounded-3xl border border-border shadow-sm h-full group hover:border-blue-500/50 transition-colors">
-                <div className="w-14 h-14 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <div className="p-6 md:p-8 bg-card rounded-3xl border border-border shadow-sm h-full group hover:border-blue-500/50 transition-colors">
+                <div className="w-12 h-12 md:w-14 md:h-14 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <ShieldCheck size={28} />
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-4">Zero-Knowledge Verification</h3>
+                <h3 className="text-lg md:text-xl font-bold text-foreground mb-3 md:mb-4">Zero-Knowledge Verification</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Before any algorithmic trade is executed, it passes through our ZK-proof verification layer. This ensures that the transaction parameters are mathematically guaranteed to be profitable before execution.
                 </p>
@@ -108,13 +108,13 @@ export default function CryptoExperience() {
           </div>
 
           <FadeInView delay={0.3}>
-            <div className="bg-primary text-primary-foreground p-10 rounded-3xl shadow-md relative overflow-hidden flex flex-col md:flex-row items-center gap-8">
+            <div className="bg-primary text-primary-foreground p-8 md:p-10 rounded-3xl shadow-md relative overflow-hidden flex flex-col md:flex-row items-center gap-6 md:gap-8">
               <div className="absolute right-0 top-0 opacity-10 pointer-events-none transform translate-x-1/4 -translate-y-1/4">
-                <Cpu size={400} />
+                <Cpu size={300} md:size={400} />
               </div>
               <div className="flex-1 relative z-10">
-                <h3 className="text-2xl font-bold mb-4">Continuous Model Training</h3>
-                <p className="opacity-90 max-w-2xl text-base leading-relaxed">
+                <h3 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">Continuous Model Training</h3>
+                <p className="opacity-90 max-w-2xl text-sm md:text-base leading-relaxed">
                   Our AI models are never static. They undergo continuous reinforcement learning, adapting to new blockchain protocols, shifting macroeconomic trends, and fluctuating volatility indexes. This ensures our yield generation strategies remain robust globally.
                 </p>
               </div>
@@ -124,22 +124,22 @@ export default function CryptoExperience() {
       </section>
 
       {/* Company Section */}
-      <section id="company" className="py-24 bg-secondary/30 border-t border-border">
-        <div className="container mx-auto px-6 max-w-6xl">
+      <section id="company" className="py-16 md:py-24 bg-secondary/30 border-t border-border">
+        <div className="container mx-auto px-4 md:px-6 max-w-6xl">
           <FadeInView>
-            <div className="text-center mb-16">
+            <div className="text-center mb-12 md:mb-16">
               <span className="text-primary font-semibold tracking-widest uppercase text-xs mb-3 block">Corporate Profile</span>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">About Our Company</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
                 Democratizing access to institutional-grade yield generation through secure infrastructure.
               </p>
             </div>
           </FadeInView>
 
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             <FadeInView>
-              <div className="bg-card border border-border p-10 rounded-3xl shadow-sm h-full flex flex-col justify-center">
-                <h3 className="text-2xl font-bold text-foreground mb-6">Our Heritage & Mission</h3>
+              <div className="bg-card border border-border p-6 md:p-10 rounded-3xl shadow-sm h-full flex flex-col justify-center">
+                <h3 className="text-xl md:text-2xl font-bold text-foreground mb-4 md:mb-6">Our Heritage & Mission</h3>
                 <p className="text-muted-foreground leading-relaxed mb-6 text-sm">
                   Asset Circle was founded by a consortium of former quantitative analysts and blockchain security engineers. We witnessed first-hand how institutional giants utilized complex algorithms to extract billions from the crypto markets with virtually zero risk, while retail investors were left exposed to high volatility.
                 </p>
@@ -191,22 +191,22 @@ export default function CryptoExperience() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-24 border-t border-border">
-        <div className="container mx-auto px-6 max-w-4xl">
+      <section id="contact" className="py-16 md:py-24 border-t border-border">
+        <div className="container mx-auto px-4 md:px-6 max-w-4xl">
           <FadeInView>
-            <div className="text-center mb-16">
+            <div className="text-center mb-12 md:mb-16">
               <span className="text-primary font-semibold tracking-widest uppercase text-xs mb-3 block">Reach Out</span>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Contact Support</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
                 Need assistance or want to learn more about our institutional allocations? Get in touch with our team directly.
               </p>
             </div>
           </FadeInView>
 
           <FadeInView delay={0.1}>
-            <div className="bg-card border border-border rounded-3xl shadow-lg overflow-hidden">
+            <div className="bg-card border border-border rounded-3xl shadow-lg overflow-hidden mx-2 md:mx-0">
               <div className="h-2 w-full bg-gradient-to-r from-primary via-blue-500 to-primary" />
-              <form onSubmit={handleContact} className="p-8 md:p-10 space-y-6">
+              <form onSubmit={handleContact} className="p-6 md:p-10 space-y-6">
                 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
@@ -236,8 +236,8 @@ export default function CryptoExperience() {
 
                 <div>
                   <label className="block text-xs font-semibold text-muted-foreground uppercase mb-2">Phone Number</label>
-                  <div className="flex gap-2">
-                    <div className="w-1/3 max-w-[120px]">
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="w-full sm:w-1/3 sm:max-w-[120px]">
                       <CountryDropdown selectedCountry={selectedCountry} onChange={setSelectedCountry} />
                     </div>
                     <div className="relative flex-1">
