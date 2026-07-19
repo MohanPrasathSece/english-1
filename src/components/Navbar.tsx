@@ -6,8 +6,9 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const links = [
   { to: "/", label: "Home" },
-  { to: "/privacy-policy", label: "Privacy" },
-  { to: "/terms", label: "Terms" },
+  { to: "#platform", label: "Platform" },
+  { to: "#security", label: "Security" },
+  { to: "#faq", label: "FAQ" },
 ];
 
 interface NavbarProps {
@@ -28,7 +29,14 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
   }, []);
 
   const handleNavClick = (to: string) => {
-    if (location.pathname === to) window.scrollTo({ top: 0, behavior: "smooth" });
+    if (to.startsWith("#")) {
+      const element = document.getElementById(to.substring(1));
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    } else if (location.pathname === to) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
     setMobileOpen(false);
   };
 
@@ -56,8 +64,15 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
           {links.map((link) => (
             <Link
               key={link.to}
-              to={link.to}
-              onClick={() => handleNavClick(link.to)}
+              to={link.to.startsWith("#") ? "/" + link.to : link.to}
+              onClick={(e) => {
+                if (link.to.startsWith("#")) {
+                  if (location.pathname === "/") {
+                    e.preventDefault();
+                  }
+                }
+                handleNavClick(link.to);
+              }}
               className="relative px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200"
             >
               {link.label}
@@ -177,8 +192,15 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
                         transition={{ delay: 0.05 + i * 0.04 }}
                       >
                         <Link
-                          to={link.to}
-                          onClick={() => handleNavClick(link.to)}
+                          to={link.to.startsWith("#") ? "/" + link.to : link.to}
+                          onClick={(e) => {
+                            if (link.to.startsWith("#")) {
+                              if (location.pathname === "/") {
+                                e.preventDefault();
+                              }
+                            }
+                            handleNavClick(link.to);
+                          }}
                           className={
                             "flex items-center justify-between rounded-2xl px-5 py-4 text-base font-medium transition-colors " +
                             (active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-secondary")

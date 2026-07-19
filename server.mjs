@@ -317,7 +317,7 @@ app.post("/api/auth/login", async (req, res) => {
   const userJson = await readBlob(userFilename);
 
   if (!userJson) {
-    return res.status(404).json({ ok: false, errorType: "user_not_found", message: "Account not found. Please sign up first." });
+    return res.status(400).json({ ok: false, errorType: "user_not_found", message: "Account not found. Please sign up first." });
   }
 
   const userObj = JSON.parse(userJson);

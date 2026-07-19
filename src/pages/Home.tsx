@@ -255,7 +255,7 @@ export default function Home({ onOpenAuth, user }: HomeProps) {
       </section>
 
       {/* Authenticity / Institutional Architecture */}
-      <section className="py-24 relative overflow-hidden">
+      <section id="platform" className="py-24 relative overflow-hidden">
         <div className="container mx-auto px-6 relative z-10">
           <FadeInView>
             <div className="max-w-3xl mx-auto text-center mb-20">
@@ -316,6 +316,56 @@ export default function Home({ onOpenAuth, user }: HomeProps) {
         </div>
       </section>
 
+      {/* Technology / Integrations (New Section) */}
+      <section id="security" className="py-24 bg-secondary/50 border-t border-border relative overflow-hidden">
+        <div className="container mx-auto px-6 max-w-5xl relative z-10">
+          <FadeInView>
+            <div className="text-center mb-16">
+              <span className="text-primary font-semibold tracking-widest uppercase text-xs mb-3 block">Technology Stack</span>
+              <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4 tracking-tight">Enterprise Infrastructure</h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Asset Circle is powered by a robust, multi-layered technology stack designed to provide maximum uptime, latency-free arbitrage, and impenetrable security.
+              </p>
+            </div>
+          </FadeInView>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <FadeInView delay={0.1}>
+              <div className="bg-card border border-border p-8 rounded-3xl shadow-sm h-full flex flex-col justify-center relative overflow-hidden group">
+                <div className="absolute -right-10 -top-10 text-primary opacity-5 group-hover:opacity-10 transition-opacity">
+                  <Activity size={200} />
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <TrendingUp size={20} />
+                  </div>
+                  Low-Latency Execution
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Our trading servers are collocated directly at major decentralized exchange nodes. This ensures we can execute arbitrage trades milliseconds faster than the wider market, securing risk-free yield before slippage occurs.
+                </p>
+              </div>
+            </FadeInView>
+            <FadeInView delay={0.2}>
+              <div className="bg-card border border-border p-8 rounded-3xl shadow-sm h-full flex flex-col justify-center relative overflow-hidden group">
+                <div className="absolute -right-10 -top-10 text-blue-500 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <Shield size={200} />
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
+                    <Lock size={20} />
+                  </div>
+                  Zero-Knowledge Proofs
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Asset Circle utilizes ZK-Rollups and advanced cryptographic protocols to verify transaction validity without exposing underlying private data. Your capital is moved securely with complete on-chain anonymity.
+                </p>
+              </div>
+            </FadeInView>
+          </div>
+        </div>
+      </section>
+
       {/* Urgency CTA Section */}
       <section className="py-24 relative overflow-hidden bg-primary text-primary-foreground">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
@@ -347,7 +397,7 @@ export default function Home({ onOpenAuth, user }: HomeProps) {
       </section>
 
       {/* Expanded FAQ Section */}
-      <section className="py-24 bg-background">
+      <section id="faq" className="py-24 bg-background">
         <div className="container mx-auto px-6 max-w-3xl">
           <FadeInView>
             <div className="text-center mb-16">
