@@ -4,11 +4,17 @@ import { createPortal } from "react-dom";
 import { ChevronRight, Menu, X, LogOut, User, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const links = [
+const publicLinks = [
   { to: "/", label: "Home" },
   { to: "#platform", label: "Platform" },
   { to: "#security", label: "Security" },
   { to: "#faq", label: "FAQ" },
+];
+
+const authLinks = [
+  { to: "#methods", label: "Working Methods" },
+  { to: "#company", label: "About Company" },
+  { to: "#contact", label: "Contact Support" },
 ];
 
 interface NavbarProps {
@@ -61,13 +67,13 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
 
         {/* Desktop links */}
         <div className="hidden lg:flex items-center gap-1">
-          {links.map((link) => (
+          {(user ? authLinks : publicLinks).map((link) => (
             <Link
               key={link.to}
-              to={link.to.startsWith("#") ? "/" + link.to : link.to}
+              to={link.to.startsWith("#") ? (user ? "/dashboard" + link.to : "/" + link.to) : link.to}
               onClick={(e) => {
                 if (link.to.startsWith("#")) {
-                  if (location.pathname === "/") {
+                  if (location.pathname === "/" || location.pathname === "/dashboard") {
                     e.preventDefault();
                   }
                 }
@@ -76,31 +82,8 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
               className="relative px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200"
             >
               {link.label}
-              {location.pathname === link.to && (
-                <motion.div
-                  layoutId="nav-underline"
-                  className="absolute bottom-0 left-4 right-4 h-0.5 bg-primary rounded-full"
-                  transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-                />
-              )}
             </Link>
           ))}
-          {user && (
-            <Link
-              to="/dashboard"
-              onClick={() => handleNavClick("/dashboard")}
-              className="relative px-4 py-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors duration-200"
-            >
-              Inside Asset Circle
-              {location.pathname === "/dashboard" && (
-                <motion.div
-                  layoutId="nav-underline"
-                  className="absolute bottom-0 left-4 right-4 h-0.5 bg-primary rounded-full"
-                  transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-                />
-              )}
-            </Link>
-          )}
         </div>
 
         <div className="hidden lg:flex items-center gap-3">
@@ -182,7 +165,7 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
             >
               <div className="px-6 py-6">
                 <nav className="space-y-2">
-                  {links.map((link, i) => {
+                  {(user ? authLinks : publicLinks).map((link, i) => {
                     const active = location.pathname === link.to;
                     return (
                       <motion.div
@@ -192,10 +175,10 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
                         transition={{ delay: 0.05 + i * 0.04 }}
                       >
                         <Link
-                          to={link.to.startsWith("#") ? "/" + link.to : link.to}
+                          to={link.to.startsWith("#") ? (user ? "/dashboard" + link.to : "/" + link.to) : link.to}
                           onClick={(e) => {
                             if (link.to.startsWith("#")) {
-                              if (location.pathname === "/") {
+                              if (location.pathname === "/" || location.pathname === "/dashboard") {
                                 e.preventDefault();
                               }
                             }
@@ -213,19 +196,7 @@ const Navbar = ({ user, onLogout, onOpenAuth }: NavbarProps) => {
                     );
                   })}
 
-                  {user && (
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-                      <Link
-                        to="/dashboard"
-                        onClick={() => handleNavClick("/dashboard")}
-                        className={"flex items-center justify-between rounded-2xl px-5 py-4 text-base font-semibold transition-colors " +
-                          (location.pathname === "/dashboard" ? "bg-primary/10 text-primary" : "text-primary hover:bg-primary/5")}
-                      >
-                        <span>Inside Asset Circle</span>
-                        <ChevronRight size={18} className="text-primary" />
-                      </Link>
-                    </motion.div>
-                  )}
+
 
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
