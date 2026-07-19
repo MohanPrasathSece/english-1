@@ -110,7 +110,7 @@ export default function CryptoExperience() {
           <FadeInView delay={0.3}>
             <div className="bg-primary text-primary-foreground p-8 md:p-10 rounded-3xl shadow-md relative overflow-hidden flex flex-col md:flex-row items-center gap-6 md:gap-8">
               <div className="absolute right-0 top-0 opacity-10 pointer-events-none transform translate-x-1/4 -translate-y-1/4">
-                <Cpu size={300} md:size={400} />
+                <Cpu className="w-64 h-64 md:w-96 md:h-96" />
               </div>
               <div className="flex-1 relative z-10">
                 <h3 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">Continuous Model Training</h3>
