@@ -30,7 +30,9 @@ export const countries: Country[] = [
   { name: "Brazil", iso: "BR", dialCode: "55", regex: /^9\d{9}$/, example: "9123456789" },
   { name: "Mexico", iso: "MX", dialCode: "52", regex: /^[1-9]\d{9}$/, example: "5512345678" },
   { name: "Japan", iso: "JP", dialCode: "81", regex: /^[789]0\d{8}$/, example: "9012345678" },
-  { name: "Cyprus", iso: "CY", dialCode: "357", regex: /^9\d{7}$/, example: "99123456" }
+  { name: "Cyprus", iso: "CY", dialCode: "357", regex: /^9\d{7}$/, example: "99123456" },
+  { iso: "IE", name: "Ireland", dialCode: "+353", example: "+353 87 123 4567", regex: /^[89]\d{7,8}$/ },
+  { iso: "GBR", name: "Great Britain", dialCode: "+44", example: "+44 7700 900077", regex: /^7\d{9}$/ },
 ];
 
 export function cleanPhoneNumber(phone: string, dialCode: string): string {
