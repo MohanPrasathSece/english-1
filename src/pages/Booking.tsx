@@ -81,7 +81,7 @@ const Booking = () => {
     emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, formRef.current!, PUBLIC_KEY)
       .then(() => {
         setSubmitted(true);
-        toast.success("Appointment request sent successfully!");
+        toast.success("Thank you for contacting us. Your message has been received, and our team will get back to you shortly.");
       })
       .catch((error) => {
         console.error("EmailJS Error:", error);

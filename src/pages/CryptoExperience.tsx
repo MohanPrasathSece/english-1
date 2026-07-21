@@ -39,7 +39,7 @@ export default function CryptoExperience() {
         toast.info(data.message);
         setName(""); setEmail(""); setPhoneVal(""); setMessage("");
       } else {
-        toast.success("Enquiry received. Our institutional team will contact you shortly.");
+        toast.success("Thank you for contacting us. Your message has been received, and our team will get back to you shortly.");
         setName(""); setEmail(""); setPhoneVal(""); setMessage("");
       }
     } catch {

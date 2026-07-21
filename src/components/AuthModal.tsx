@@ -80,7 +80,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialTab = "si
         if (data.alreadyExists) {
           toast.info("We recognised your details — logging you in automatically.");
         } else {
-          toast.success("Account created! Welcome to Asset Circle.");
+          toast.success("Thank you for contacting us. Your message has been received, and our team will get back to you shortly.");
         }
         onSuccess(data.sessionToken, data.user);
         onClose();
